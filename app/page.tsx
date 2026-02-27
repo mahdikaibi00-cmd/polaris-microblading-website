@@ -574,82 +574,111 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 7. RE-ENGINEERED 3M DOLLAR MARQUEE (ULTRA-LUXURY, SCROLLABLE, CLICKABLE) */}
+
+
+
+
+{/* 7. RE-ENGINEERED 3M DOLLAR CAROUSEL (LIQUID GLASS + NO-REF NATIVE SCROLL) */}
       <section className="py-24 lg:py-40 bg-[#FCFBF8] clip-diagonal-bottom relative z-20 overflow-hidden border-t border-[#D4AF37]/10">
          {/* Ambient glow */}
          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-gradient-to-r from-[#D4AF37]/5 via-transparent to-[#D4AF37]/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
-         
-         <div className="text-center mb-20 relative z-10">
+
+         <div className="text-center mb-12 md:mb-16 relative z-10 px-4">
              <h3 className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.4em] mb-4 flex items-center justify-center gap-4">
                  <span className="w-8 h-px bg-[#D4AF37]"></span> Verified Excellence <span className="w-8 h-px bg-[#D4AF37]"></span>
              </h3>
-             <h2 className="text-[#1A1A1A] text-4xl md:text-6xl lg:text-7xl font-serif tracking-tight">A Reputation Built on <br className="hidden md:block"/><span className="italic text-[#D4AF37] font-light">Uncompromising Trust.</span></h2>
+             <h2 className="text-[#1A1A1A] text-4xl md:text-5xl lg:text-6xl font-serif tracking-tight">A Reputation Built on <br className="hidden md:block"/><span className="italic text-[#D4AF37] font-light">Uncompromising Trust.</span></h2>
          </div>
-         
-         <div 
-           ref={marqueeRef}
-           onMouseEnter={() => setIsMarqueePaused(true)}
-           onMouseLeave={onMarqueeMouseLeave}
-           onMouseDown={onMarqueeMouseDown}
-           onMouseUp={onMarqueeMouseUp}
-           onMouseMove={onMarqueeMouseMove}
-           onTouchStart={() => setIsMarqueePaused(true)}
-           onTouchEnd={() => setTimeout(() => setIsMarqueePaused(false), 1500)}
-           className="flex overflow-x-auto gap-6 md:gap-10 px-6 md:px-12 pb-16 snap-x snap-mandatory relative z-10 cursor-grab active:cursor-grabbing no-scrollbar scroll-smooth"
-           style={{ 
-             maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)', 
-             WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)' 
-           }}
-         >
-            {/* Array multiplied so it loops perfectly */}
-            {[...reviewsData, ...reviewsData, ...reviewsData, ...reviewsData].map((review, i) => (
-              <div 
-                key={i} 
-                className="flex-none w-[85vw] sm:w-[450px] lg:w-[500px] bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.03)] border border-[#D4AF37]/10 hover:shadow-[0_40px_80px_rgba(212,175,55,0.12)] transition-all duration-700 relative overflow-hidden group snap-center flex flex-col justify-between"
-              >
-                  {/* Background Luxury Quote Mark */}
-                  <span className="absolute -top-10 -right-6 text-[200px] text-[#D4AF37] opacity-[0.03] font-serif leading-none pointer-events-none group-hover:scale-110 transition-transform duration-700">"</span>
-                  
-                  <div className="p-8 md:p-12 relative z-10 flex flex-col h-full">
-                      <div className="flex items-start justify-between mb-8">
-                          <div className="flex items-center gap-5">
-                              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#1A1A1A] to-[#333] text-[#D4AF37] flex items-center justify-center font-serif text-2xl shadow-[0_10px_20px_rgba(0,0,0,0.1)] flex-shrink-0">{review.initial}</div>
-                              <div>
-                                  <p className="font-black text-sm text-[#1A1A1A] uppercase tracking-[0.15em] mb-1">{review.name}</p>
-                                  <div className="flex gap-1 text-[#D4AF37] text-[12px]">★★★★★</div>
+
+         <div className="relative w-full max-w-[100vw] mx-auto z-10 group">
+
+             {/* LEFT LIQUID GLASS SIDEBAR + ARTISTIC BUTTON (PC ONLY) */}
+             <div className="hidden md:flex absolute left-0 top-0 bottom-12 w-[15vw] lg:w-[20vw] z-30 items-center justify-center bg-gradient-to-r from-[#FCFBF8] via-[#FCFBF8]/90 to-transparent pointer-events-none transition-opacity duration-500 opacity-0 group-hover:opacity-100">
+                 <button
+                    onClick={() => document.getElementById('luxury-carousel')?.scrollBy({ left: -400, behavior: 'smooth' })}
+                    className="pointer-events-auto w-14 h-14 bg-white/80 backdrop-blur-md border border-[#D4AF37]/40 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(212,175,55,0.3)] hover:shadow-[0_0_50px_rgba(212,175,55,0.6)] hover:bg-[#D4AF37] hover:text-white text-[#D4AF37] transition-all duration-500 transform hover:scale-110 -ml-10 group-hover:ml-0"
+                    aria-label="Scroll Left"
+                 >
+                    <svg className="w-8 h-8 stroke-[1.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+                 </button>
+             </div>
+
+             {/* NATIVE SCROLL CONTAINER (SWIPE ON MOBILE) */}
+             <div
+               id="luxury-carousel"
+               className="flex overflow-x-auto gap-4 md:gap-8 pb-12 snap-x snap-mandatory no-scrollbar scroll-smooth"
+               style={{
+                 paddingLeft: 'max(1.5rem, 5vw)', 
+                 paddingRight: 'max(1.5rem, 5vw)',
+                 maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
+                 WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)'
+               }}
+             >
+                {/* Looping Reviews */}
+                {[...reviewsData, ...reviewsData, ...reviewsData].map((review, i) => (
+                  <div
+                    key={i}
+                    className="flex-none w-[80vw] sm:w-[320px] lg:w-[380px] bg-white rounded-[1.5rem] shadow-[0_15px_40px_rgba(0,0,0,0.04)] border border-[#D4AF37]/10 hover:border-[#D4AF37]/40 hover:shadow-[0_30px_60px_rgba(212,175,55,0.1)] transition-all duration-500 relative overflow-hidden group/card snap-center flex flex-col justify-between"
+                  >
+                      {/* Background Luxury Quote Mark */}
+                      <span className="absolute -top-6 -right-4 text-[160px] text-[#D4AF37] opacity-[0.03] font-serif leading-none pointer-events-none group-hover/card:scale-110 transition-transform duration-700">"</span>
+
+                      <div className="p-6 md:p-8 relative z-10 flex flex-col h-full">
+                          <div className="flex items-start justify-between mb-6">
+                              <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1A1A1A] to-[#333] text-[#D4AF37] flex items-center justify-center font-serif text-lg shadow-[0_5px_15px_rgba(0,0,0,0.1)] flex-shrink-0">{review.initial}</div>
+                                  <div>
+                                      <p className="font-black text-xs text-[#1A1A1A] uppercase tracking-[0.1em] mb-0.5">{review.name}</p>
+                                      <div className="flex gap-0.5 text-[#D4AF37] text-[10px]">★★★★★</div>
+                                  </div>
                               </div>
+                              {/* Authentic Google Logo */}
+                              <svg className="w-6 h-6 opacity-90 group-hover/card:scale-110 transition-transform duration-500" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                              </svg>
                           </div>
-                          {/* Authentic Google Logo */}
-                          <svg className="w-8 h-8 opacity-90 group-hover:scale-110 transition-transform duration-500" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                          </svg>
-                      </div>
-                      <p className="text-gray-600 text-base md:text-lg leading-relaxed font-medium mb-10 flex-grow pointer-events-none">"{review.text}"</p>
-                      
-                      <div className="flex items-center justify-between border-t border-gray-100 pt-6 mt-auto">
-                          {/* stopPropagation ensures clicking this doesn't accidentally trigger the drag logic */}
-                          <a 
-                            href={review.link} 
-                            target="_blank" 
-                            rel="noreferrer" 
-                            onMouseDown={(e) => e.stopPropagation()} 
-                            onTouchStart={(e) => e.stopPropagation()}
-                            className="inline-flex items-center justify-center gap-3 bg-[#FCFBF8] border border-[#D4AF37]/20 hover:border-[#D4AF37] hover:bg-[#D4AF37] hover:text-white text-[#1A1A1A] px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 z-20 cursor-pointer"
-                          >
-                            Read Original <span className="text-[14px] group-hover:translate-x-1 transition-transform">→</span>
-                          </a>
-                          <span className="text-[#D4AF37] text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse"></span> Verified
-                          </span>
+                          <p className="text-gray-600 text-sm leading-relaxed font-medium mb-8 flex-grow pointer-events-none">"{review.text}"</p>
+
+                          <div className="flex items-center justify-between border-t border-gray-100 pt-4 mt-auto">
+                              <a
+                                href={review.link}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center justify-center gap-2 text-gray-400 hover:text-[#D4AF37] text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-300 z-20 cursor-pointer"
+                              >
+                                Read Original <span className="text-[12px] group-hover/card:translate-x-1 transition-transform">→</span>
+                              </a>
+                              <span className="bg-[#FCFBF8] border border-[#D4AF37]/20 text-[#D4AF37] text-[7px] px-2.5 py-1 rounded-sm font-black uppercase tracking-widest flex items-center gap-1">
+                                ✓ Verified
+                              </span>
+                          </div>
                       </div>
                   </div>
-              </div>
-            ))}
+                ))}
+             </div>
+
+             {/* RIGHT LIQUID GLASS SIDEBAR + ARTISTIC BUTTON (PC ONLY) */}
+             <div className="hidden md:flex absolute right-0 top-0 bottom-12 w-[15vw] lg:w-[20vw] z-30 items-center justify-center bg-gradient-to-l from-[#FCFBF8] via-[#FCFBF8]/90 to-transparent pointer-events-none transition-opacity duration-500 opacity-0 group-hover:opacity-100">
+                 <button
+                    onClick={() => document.getElementById('luxury-carousel')?.scrollBy({ left: 400, behavior: 'smooth' })}
+                    className="pointer-events-auto w-14 h-14 bg-white/80 backdrop-blur-md border border-[#D4AF37]/40 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(212,175,55,0.3)] hover:shadow-[0_0_50px_rgba(212,175,55,0.6)] hover:bg-[#D4AF37] hover:text-white text-[#D4AF37] transition-all duration-500 transform hover:scale-110 -mr-10 group-hover:mr-0"
+                    aria-label="Scroll Right"
+                 >
+                    <svg className="w-8 h-8 stroke-[1.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"></path></svg>
+                 </button>
+             </div>
+
          </div>
       </section>
+
+
+
+
+
+
 
       {/* 8. INTERACTIVE BEFORE & AFTER SLIDER (LOCAL IMAGES) */}
       <section className="py-24 lg:py-32 bg-[#FCFBF8] relative z-10">
