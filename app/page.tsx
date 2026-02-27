@@ -1,4 +1,5 @@
 "use client";
+import Image from 'next/image';
 import { useState, useRef, MouseEvent as ReactMouseEvent, TouchEvent as ReactTouchEvent, useEffect } from 'react';
 
 export default function Home() {
@@ -315,7 +316,7 @@ export default function Home() {
           </div>
       </section>
 
-      {/* 5. MIND-BLOWING BENTO GRID MENU */}
+      {/* 5. MIND-BLOWING BENTO GRID MENU (CENTERED TITLE) */}
       <section id="services" className="py-24 lg:py-36 bg-white relative z-20 overflow-hidden">
         <div className="absolute top-[-10%] right-[-10%] w-[800px] h-[800px] bg-gradient-to-bl from-[#D4AF37]/10 via-[#FAF6F0] to-transparent rounded-full blur-[100px] animate-spin-slow pointer-events-none"></div>
         <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-gradient-to-tr from-[#E6C5C0]/20 to-transparent rounded-full blur-[120px] pointer-events-none"></div>
@@ -326,7 +327,7 @@ export default function Home() {
              <h4 className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.3em] mb-4 flex items-center justify-center gap-3">
                 <span className="w-6 h-px bg-[#D4AF37]"></span> Curated Artistry <span className="w-6 h-px bg-[#D4AF37]"></span>
              </h4>
-             <h2 className="text-4xl md:text-6xl font-serif text-[#1A1A1A] tracking-tight mb-6">Signature <span className="italic text-[#D4AF37]">Treatments.</span></h2>
+             <h2 className="text-4xl md:text-6xl font-serif text-[#1A1A1A] tracking-tight mb-8">Signature <span className="italic text-[#D4AF37]">Treatments.</span></h2>
              <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="inline-flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors group bg-[#FAF6F0] px-8 py-4 rounded-full border border-[#D4AF37]/20 shadow-sm hover:shadow-[0_10px_20px_rgba(212,175,55,0.1)]">
                View Full Booking Menu <span className="group-hover:translate-x-1 transition-transform">→</span>
              </a>
@@ -760,10 +761,10 @@ export default function Home() {
                       
                       <button type="button" onClick={(e) => {
                         const form = e.currentTarget.closest('form');
-                        if(form && form.name.value && form.email.value && form.phone.value) {
+                        if (form && form.checkValidity()) {
                           setChatStep(2);
                         } else {
-                          alert("Please fill in all fields to continue.");
+                          form?.reportValidity();
                         }
                       }} className="w-full bg-[#1A1A1A] text-white text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-sm shadow-xl hover:bg-[#D4AF37] transition-colors">Continue</button>
                    </div>
@@ -775,7 +776,6 @@ export default function Home() {
                         Perfect. Now securely upload 3 clear photos of your face in good lighting. I need to see your bone structure and skin undertones clearly.
                       </div>
                       
-                      {/* Note: Web3Forms free tier handles files if configured, otherwise this serves as premium UI */}
                       <div className="grid grid-cols-3 gap-3">
                          <label className="aspect-square bg-[#FCFBF8] border border-dashed border-[#D4AF37]/50 rounded-sm flex flex-col items-center justify-center cursor-pointer hover:border-[#D4AF37] transition-colors group relative overflow-hidden">
                             <input type="file" name="left_brow" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
