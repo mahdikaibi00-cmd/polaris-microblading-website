@@ -29,7 +29,7 @@ export default function Home() {
     handleSliderMove(e.touches[0].clientX);
   };
 
-  // --- 2M DOLLAR MARQUEE LOGIC (AUTO-SCROLL + DRAG/SWIPE) ---
+  // --- 3M DOLLAR MARQUEE LOGIC (AUTO-SCROLL + DRAG/SWIPE) ---
   const marqueeRef = useRef<HTMLDivElement>(null);
   const [isMarqueePaused, setIsMarqueePaused] = useState(false);
   const [isDraggingMarquee, setIsDraggingMarquee] = useState(false);
@@ -80,13 +80,14 @@ export default function Home() {
     marqueeRef.current.scrollLeft = scrollLeft - walk;
   };
 
+  // --- REVIEWS DATA ---
   const reviewsData = [
     { initial: "A", name: "Anna", link: "https://maps.app.goo.gl/SYMzModDM8EXBM6F7", text: "Amazing experience! Janna was so professional, thorough, knowledgeable, personable and TALENTED! Absolutely love my brows!!" },
     { initial: "S", name: "Susana Cuero", link: "https://www.google.com/maps/place/Polaris+Aesthetics/@40.1442707,-82.9914008,17z/data=!3m1!4b1!4m6!3m5!1s0x8838f52e99680d51:0x15b295572df54161!8m2!3d40.1442707!4d-82.9888259!16s%2Fg%2F11jnf_hb4q?entry=ttu&g_ep=EgoyMDI2MDIyMy4wIKXMDSoASAFQAw%3D%3D", text: "The service is excellent!!! You get what you expect!!! 😍😍😍 plus you feel like if you were in a SPA 🧘‍♀️." },
     { initial: "W", name: "Wendy", link: "https://maps.app.goo.gl/SYMzModDM8EXBM6F7", text: "Janna was very professional and made me feel very comfortable... She was very thorough in explaining the process and aftercare." }
   ];
 
-  // --- INLINE VIRTUAL ASSESSMENT LOGIC (HIDDEN IFRAME TRICK) ---
+  // --- VIRTUAL ASSESSMENT LOGIC ---
   const [assessmentStatus, setAssessmentStatus] = useState("idle");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -107,19 +108,32 @@ export default function Home() {
     }
   };
 
-  const handleAssessmentSubmit = () => {
-    // IMPORTANT: No e.preventDefault() here! 
-    // We want the form to natively send the image to the hidden iframe.
+  const handleAssessmentSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setAssessmentStatus("loading");
-    setChatStep(3); 
+    setChatStep(3); // Loading State
     
-    // Fake the loading UI while the iframe processes the upload invisibly
-    setTimeout(() => {
-      setAssessmentStatus("success");
-      setChatStep(4);
-    }, 3000);
-  };
+    const formData = new FormData(e.currentTarget);
+    formData.append("access_key", "de75332f-f09b-4b62-afc0-e22d429112fb");
+    formData.append("subject", "🚨 New Virtual Assessment & Photo - Polaris");
 
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: formData // FormData automatically handles the multipart/form-data for the image
+      });
+      if (response.ok) {
+        setAssessmentStatus("success");
+        setChatStep(4);
+      } else {
+        setAssessmentStatus("error");
+        setChatStep(4);
+      }
+    } catch (error) {
+      setAssessmentStatus("error");
+      setChatStep(4);
+    }
+  };
 
   return (
     <div className="bg-[#FCFBF8] text-[#1A1A1A] font-sans antialiased selection:bg-[#D4AF37] selection:text-white overflow-x-hidden">
@@ -165,7 +179,6 @@ export default function Home() {
           
           <div className="hidden lg:flex space-x-10 text-[#1A1A1A] text-[11px] font-bold uppercase tracking-[0.15em] relative">
             
-            {/* UPGRADED APPLE LIQUID GLASS DROPDOWN */}
             <div className="relative group py-8">
               <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="hover:text-[#D4AF37] transition-colors flex items-center gap-1 cursor-pointer">
                 Treatments <span className="text-[8px] group-hover:rotate-180 transition-transform duration-300">▼</span>
@@ -238,7 +251,7 @@ export default function Home() {
                 Reserve Your Appt
               </a>
               <a href="/portfolio" className="bg-transparent border border-[#1A1A1A]/20 hover:border-[#D4AF37] hover:bg-white text-[#1A1A1A] px-8 lg:px-10 py-4 lg:py-4.5 rounded-sm text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] transition-all duration-500 flex items-center justify-center gap-3 group">
-                Discover The Artistry <span className="group-hover:translate-x-1 transition-transform">→</span>
+                Visual Archive <span className="group-hover:translate-x-1 transition-transform">→</span>
               </a>
             </div>
           </div>
@@ -553,66 +566,79 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 7. RE-ENGINEERED 2M DOLLAR MARQUEE (AUTO-SCROLL + SWIPE) */}
-      <section className="py-24 lg:py-36 bg-[#FCFBF8] clip-diagonal-bottom relative z-20 overflow-hidden border-t border-[#D4AF37]/10">
-         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#D4AF37]/5 rounded-full blur-[100px] pointer-events-none z-0"></div>
+
+
+
+
+{/* 7. RE-ENGINEERED 3M DOLLAR MARQUEE (ULTRA-LUXURY, SCROLLABLE, CLICKABLE) */}
+      <section className="py-24 lg:py-40 bg-[#FCFBF8] clip-diagonal-bottom relative z-20 overflow-hidden border-t border-[#D4AF37]/10">
+         {/* Ambient glow */}
+         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-gradient-to-r from-[#D4AF37]/5 via-transparent to-[#D4AF37]/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
          
-         <div className="text-center mb-16 relative z-10">
-             <h3 className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.3em] mb-4 flex items-center justify-center gap-3">
-                 <span className="w-6 h-px bg-[#D4AF37]"></span> Client Experiences <span className="w-6 h-px bg-[#D4AF37]"></span>
+         <div className="text-center mb-20 relative z-10">
+             <h3 className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.4em] mb-4 flex items-center justify-center gap-4">
+                 <span className="w-8 h-px bg-[#D4AF37]"></span> Verified Excellence <span className="w-8 h-px bg-[#D4AF37]"></span>
              </h3>
-             <h2 className="text-[#1A1A1A] text-4xl md:text-6xl font-serif tracking-tight">A Reputation Built on <span className="italic text-[#D4AF37]">Trust.</span></h2>
+             <h2 className="text-[#1A1A1A] text-4xl md:text-6xl lg:text-7xl font-serif tracking-tight">A Reputation Built on <br className="hidden md:block"/><span className="italic text-[#D4AF37] font-light">Uncompromising Trust.</span></h2>
          </div>
          
          <div 
            ref={marqueeRef}
+           onMouseEnter={() => setIsMarqueePaused(true)}
+           onMouseLeave={() => { setIsDraggingMarquee(false); setIsMarqueePaused(false); }}
            onMouseDown={onMarqueeMouseDown}
-           onMouseLeave={onMarqueeMouseLeave}
            onMouseUp={onMarqueeMouseUp}
            onMouseMove={onMarqueeMouseMove}
-           onMouseEnter={() => setIsMarqueePaused(true)}
            onTouchStart={() => setIsMarqueePaused(true)}
            onTouchEnd={() => setTimeout(() => setIsMarqueePaused(false), 1500)}
-           className="flex overflow-x-auto gap-6 px-4 md:px-8 pb-16 snap-x snap-mandatory relative z-10 cursor-grab active:cursor-grabbing no-scrollbar"
-           style={{ maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)' }}
+           className="flex overflow-x-auto gap-6 md:gap-10 px-6 md:px-12 pb-16 snap-x snap-mandatory relative z-10 cursor-grab active:cursor-grabbing no-scrollbar scroll-smooth"
+           style={{ 
+             maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)', 
+             WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)' 
+           }}
          >
-            {/* Duplicated for seamless loop */}
+            {/* We multiply the array to ensure long scrolling without running out of cards */}
             {[...reviewsData, ...reviewsData, ...reviewsData, ...reviewsData].map((review, i) => (
-              <a 
+              <div 
                 key={i} 
-                href={review.link} 
-                target="_blank" 
-                rel="noreferrer" 
-                className="flex-none w-[85vw] sm:w-[400px] bg-white/60 backdrop-blur-xl border border-white p-8 md:p-10 rounded-3xl shadow-[0_20px_40px_rgba(0,0,0,0.04)] hover:shadow-[0_30px_60px_rgba(212,175,55,0.15)] hover:-translate-y-2 transition-all duration-500 relative overflow-hidden group snap-center"
+                className="flex-none w-[85vw] sm:w-[450px] lg:w-[500px] bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.03)] border border-[#D4AF37]/10 hover:shadow-[0_40px_80px_rgba(212,175,55,0.12)] transition-all duration-700 relative overflow-hidden group snap-center flex flex-col justify-between"
               >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#D4AF37]/10 to-transparent rounded-bl-full pointer-events-none transition-opacity duration-500 opacity-0 group-hover:opacity-100"></div>
+                  {/* Background Luxury Quote Mark */}
+                  <span className="absolute -top-10 -right-6 text-[200px] text-[#D4AF37] opacity-[0.03] font-serif leading-none pointer-events-none group-hover:scale-110 transition-transform duration-700">"</span>
                   
-                  <div className="relative z-10 flex flex-col h-full justify-between">
-                      <div className="flex items-start justify-between mb-8 border-b border-gray-100 pb-6">
-                          <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 rounded-full bg-[#1A1A1A] text-[#D4AF37] flex items-center justify-center font-serif text-xl flex-shrink-0 shadow-inner">{review.initial}</div>
+                  <div className="p-8 md:p-12 relative z-10 flex flex-col h-full">
+                      <div className="flex items-start justify-between mb-8">
+                          <div className="flex items-center gap-5">
+                              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#1A1A1A] to-[#333] text-[#D4AF37] flex items-center justify-center font-serif text-2xl shadow-[0_10px_20px_rgba(0,0,0,0.1)] flex-shrink-0">{review.initial}</div>
                               <div>
-                                  <p className="font-black text-xs md:text-sm text-[#1A1A1A] uppercase tracking-widest">{review.name}</p>
-                                  <div className="flex gap-1 mt-1 text-[#D4AF37] text-[10px]">★★★★★</div>
+                                  <p className="font-black text-sm text-[#1A1A1A] uppercase tracking-[0.15em] mb-1">{review.name}</p>
+                                  <div className="flex gap-1 text-[#D4AF37] text-[12px]">★★★★★</div>
                               </div>
                           </div>
-                          <svg className="w-6 h-6 opacity-80" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          {/* Authentic Google Logo */}
+                          <svg className="w-8 h-8 opacity-90 group-hover:scale-110 transition-transform duration-500" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                           </svg>
                       </div>
-                      <p className="text-gray-600 text-sm leading-relaxed font-medium italic mb-8 flex-grow">"{review.text}"</p>
-                      <div className="flex items-center justify-between pt-2">
-                          <span className="text-[#1A1A1A] font-black text-[9px] uppercase tracking-[0.2em] group-hover:text-[#D4AF37] transition-colors flex items-center gap-2">View Original <span className="text-[12px] group-hover:translate-x-1 transition-transform">→</span></span>
-                          <span className="bg-[#FCFBF8] border border-[#D4AF37]/20 text-[#D4AF37] text-[8px] px-3 py-1.5 rounded-sm font-black uppercase tracking-widest flex items-center gap-1">✓ Verified</span>
+                      <p className="text-gray-600 text-base md:text-lg leading-relaxed font-medium mb-10 flex-grow">"{review.text}"</p>
+                      
+                      <div className="flex items-center justify-between border-t border-gray-100 pt-6 mt-auto">
+                          <a href={review.link} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-3 bg-[#FCFBF8] border border-[#D4AF37]/20 hover:border-[#D4AF37] hover:bg-[#D4AF37] hover:text-white text-[#1A1A1A] px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 z-20 cursor-pointer">
+                            Read Original <span className="text-[14px] group-hover:translate-x-1 transition-transform">→</span>
+                          </a>
+                          <span className="text-[#D4AF37] text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse"></span> Verified
+                          </span>
                       </div>
                   </div>
-              </a>
+              </div>
             ))}
          </div>
       </section>
+
 
       {/* 8. INTERACTIVE BEFORE & AFTER SLIDER (LOCAL IMAGES) */}
       <section className="py-24 lg:py-32 bg-[#FCFBF8] relative z-10">
@@ -652,8 +678,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-{/* Hidden iframe absorbs the form redirect so the user never leaves the page! */}
-            <iframe name="hidden_iframe" id="hidden_iframe" style={{ display: "none" }}></iframe>
 
       {/* 9. LEAD CAPTURE MACHINE (ULTRA-LUXURY) */}
       <section className="relative py-24 lg:py-36 bg-[#FCFBF8] clip-chevron-bottom z-20 overflow-hidden border-t border-[#D4AF37]/10">
@@ -668,21 +692,21 @@ export default function Home() {
                 Upload a clear photo of your brows securely from your phone. Janna will personally review your facial structure and email you a custom recommendation on the best pigment and technique for your features.
             </p>
 
-            <div className="max-w-4xl mx-auto bg-white/80 backdrop-blur-3xl border border-[#D4AF37]/20 p-6 md:p-12 rounded-3xl shadow-[0_40px_100px_rgba(0,0,0,0.06)] text-left relative overflow-hidden group">
+            <div className="max-w-4xl mx-auto bg-white/70 backdrop-blur-3xl border border-white p-6 md:p-10 rounded-3xl shadow-[0_40px_100px_rgba(0,0,0,0.06)] text-left relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/5 via-transparent to-transparent opacity-50 pointer-events-none"></div>
                 
                 <div className="flex justify-between items-center mb-10 border-b border-[#D4AF37]/20 pb-6 relative z-10">
-                    <span className="text-[#1A1A1A] text-[10px] uppercase tracking-[0.2em] font-black flex items-center gap-3">
+                    <span className="text-gray-500 text-[9px] uppercase tracking-[0.2em] font-black flex items-center gap-3">
                       <span className="relative flex h-2.5 w-2.5">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4AF37] opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#D4AF37]"></span>
                       </span>
                       Janna is receiving requests
                     </span>
-                    <span className="bg-[#FCFBF8] text-[#D4AF37] px-4 py-1.5 rounded-sm text-[8px] font-black tracking-[0.2em] uppercase border border-[#D4AF37]/20 shadow-sm">Secure Portal</span>
+                    <span className="bg-[#FCFBF8] text-[#D4AF37] px-4 py-1.5 rounded-full text-[8px] font-black tracking-[0.2em] uppercase border border-[#D4AF37]/20 shadow-sm">Secure Portal</span>
                 </div>
                 
-                {assessmentStatus === "success" ? (
+                {assessmentStatus === "success" && chatStep === 4 ? (
                    <div className="text-center py-20 relative z-10 animate-fade-in flex flex-col items-center justify-center">
                       <div className="relative w-24 h-24 mb-8 flex items-center justify-center">
                          <div className="absolute inset-0 bg-[#D4AF37]/20 rounded-full animate-[ping_3s_ease-in-out_infinite]"></div>
@@ -694,16 +718,12 @@ export default function Home() {
                       <h3 className="font-serif text-3xl mb-3 text-[#1A1A1A]">Securely Delivered.</h3>
                       <p className="text-gray-500 text-sm max-w-sm mx-auto leading-relaxed">Your details and photo have been encrypted and sent directly to Janna. She will reach out to your email shortly.</p>
                    </div>
-               ) : (
-                  <form action="https://formsubmit.co/mahdi.vireva@gmail.com" method="POST" target="hidden_iframe" encType="multipart/form-data" onSubmit={handleAssessmentSubmit} className="relative z-10 flex flex-col md:flex-row gap-10 lg:gap-16">
-                      <input type="hidden" name="_captcha" value="false" />
-                      <input type="hidden" name="_subject" value="🚨 New Virtual Assessment & Photo - Polaris" />
-
+                ) : (
+                  <form onSubmit={handleAssessmentSubmit} encType="multipart/form-data" className="relative z-10 flex flex-col md:flex-row gap-10 lg:gap-16">
                       
                       {/* Left: Cinematic Single Image Upload */}
                       <div className="w-full md:w-5/12 shrink-0">
                         <label className="relative flex flex-col items-center justify-center w-full aspect-[4/5] bg-[#FCFBF8] border-[1.5px] border-dashed border-[#D4AF37]/40 rounded-2xl cursor-pointer hover:border-[#D4AF37] transition-all duration-500 overflow-hidden group/upload shadow-inner">
-                            {/* The absolute inset-0 input hack allows validation to pass perfectly without 'hidden' crashing the browser */}
                             <input required type="file" name="attachment" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" accept="image/png, image/jpeg, image/jpg, image/webp" onChange={handleImageChange} />
                             
                             {previewUrl ? (
@@ -826,6 +846,14 @@ export default function Home() {
       
       {/* GLOBAL STYLES FOR ANIMATIONS AND CLIP-PATHS */}
       <style dangerouslySetInnerHTML={{__html: `
+        @keyframes marquee {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-100%); }
+        }
+        .animate-marquee {
+          animation: marquee 35s linear infinite;
+        }
+
         @keyframes slide-up {
           0% { transform: translateY(20px); opacity: 0; }
           100% { transform: translateY(0); opacity: 1; }
