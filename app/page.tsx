@@ -1,15 +1,17 @@
 "use client";
-import Image from 'next/image';
-import { useState, useRef, MouseEvent, TouchEvent, useEffect } from 'react';
+import { useState, useRef, MouseEvent as ReactMouseEvent, TouchEvent as ReactTouchEvent, useEffect } from 'react';
 
 export default function Home() {
   
+  // --- MOBILE MENU LOGIC ---
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   // --- BEFORE/AFTER SLIDER LOGIC ---
   const [sliderPosition, setSliderPosition] = useState(50);
-  const [isDragging, setIsDragging] = useState(false);
+  const [isDraggingSlider, setIsDraggingSlider] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
 
-  const handleMove = (clientX: number) => {
+  const handleSliderMove = (clientX: number) => {
     if (!sliderRef.current) return;
     const rect = sliderRef.current.getBoundingClientRect();
     const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
@@ -17,55 +19,63 @@ export default function Home() {
     setSliderPosition(percentage);
   };
 
-  const onMouseMove = (e: MouseEvent) => {
-    if (!isDragging) return;
-    handleMove(e.clientX);
+  const onSliderMouseMove = (e: ReactMouseEvent) => {
+    if (!isDraggingSlider) return;
+    handleSliderMove(e.clientX);
   };
 
-  const onTouchMove = (e: TouchEvent) => {
-    handleMove(e.touches[0].clientX);
+  const onSliderTouchMove = (e: ReactTouchEvent) => {
+    handleSliderMove(e.touches[0].clientX);
   };
 
-  // --- SWIPEABLE & AUTO-SCROLLING MARQUEE LOGIC (UPGRADED) ---
+  // --- 2M DOLLAR MARQUEE LOGIC (AUTO-SCROLL + DRAG/SWIPE) ---
   const marqueeRef = useRef<HTMLDivElement>(null);
-  const [isDown, setIsDown] = useState(false);
+  const [isMarqueePaused, setIsMarqueePaused] = useState(false);
+  const [isDraggingMarquee, setIsDraggingMarquee] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
-    const marquee = marqueeRef.current;
-    if (!marquee || isHovered || isDown) return;
+    const el = marqueeRef.current;
+    if (!el || isMarqueePaused || isDraggingMarquee) return;
     
     let animationId: number;
-    const scroll = () => {
-      marquee.scrollLeft += 1; 
-      if (marquee.scrollLeft >= marquee.scrollWidth / 2) {
-        marquee.scrollLeft = 0;
+    const scrollStep = () => {
+      el.scrollLeft += 1; // Speed of the auto-scroll
+      if (el.scrollLeft >= el.scrollWidth / 2) {
+        el.scrollLeft = 0;
       }
-      animationId = requestAnimationFrame(scroll);
+      animationId = requestAnimationFrame(scrollStep);
     };
     
-    animationId = requestAnimationFrame(scroll);
+    animationId = requestAnimationFrame(scrollStep);
     return () => cancelAnimationFrame(animationId);
-  }, [isHovered, isDown]);
+  }, [isMarqueePaused, isDraggingMarquee]);
 
-  const handleMouseDown = (e: MouseEvent) => {
-    setIsDown(true);
+  const onMarqueeMouseDown = (e: ReactMouseEvent) => {
+    setIsDraggingMarquee(true);
+    setIsMarqueePaused(true);
     if(marqueeRef.current) {
       setStartX(e.pageX - marqueeRef.current.offsetLeft);
       setScrollLeft(marqueeRef.current.scrollLeft);
     }
   };
+  
+  const onMarqueeMouseLeave = () => { 
+    setIsDraggingMarquee(false); 
+    setIsMarqueePaused(false); 
+  };
+  
+  const onMarqueeMouseUp = () => { 
+    setIsDraggingMarquee(false); 
+    setIsMarqueePaused(false); 
+  };
 
-  const handleMouseLeave = () => { setIsDown(false); setIsHovered(false); };
-  const handleMouseUp = () => setIsDown(false);
-
-  const handleDragMove = (e: MouseEvent) => {
-    if (!isDown || !marqueeRef.current) return;
+  const onMarqueeMouseMove = (e: ReactMouseEvent) => {
+    if (!isDraggingMarquee || !marqueeRef.current) return;
     e.preventDefault();
     const x = e.pageX - marqueeRef.current.offsetLeft;
-    const walk = (x - startX) * 2; // Drag speed multiplier
+    const walk = (x - startX) * 2; // Scroll speed multiplier
     marqueeRef.current.scrollLeft = scrollLeft - walk;
   };
 
@@ -90,22 +100,45 @@ export default function Home() {
       if (response.ok) {
         setChatStep(4);
       } else {
-        setChatStep(4); // Fallback to success UI for prototype
+        setChatStep(4); // Fallback to success UI
       }
     } catch (error) {
       setChatStep(4);
     }
   };
 
+  const reviewsData = [
+    { initial: "A", name: "Anna", link: "https://maps.app.goo.gl/SYMzModDM8EXBM6F7", text: "Amazing experience! Janna was so professional, thorough, knowledgeable, personable and TALENTED! Absolutely love my brows!!" },
+    { initial: "S", name: "Susana Cuero", link: "https://www.google.com/maps/place/Polaris+Aesthetics/@40.1442707,-82.9914008,17z/data=!3m1!4b1!4m6!3m5!1s0x8838f52e99680d51:0x15b295572df54161!8m2!3d40.1442707!4d-82.9888259!16s%2Fg%2F11jnf_hb4q?entry=ttu&g_ep=EgoyMDI2MDIyMy4wIKXMDSoASAFQAw%3D%3D", text: "The service is excellent!!! You get what you expect!!! 😍😍😍 plus you feel like if you were in a SPA 🧘‍♀️." },
+    { initial: "W", name: "Wendy", link: "https://maps.app.goo.gl/SYMzModDM8EXBM6F7", text: "Janna was very professional and made me feel very comfortable... She was very thorough in explaining the process and aftercare." }
+  ];
+
   return (
     <div className="bg-[#FCFBF8] text-[#1A1A1A] font-sans antialiased selection:bg-[#D4AF37] selection:text-white overflow-x-hidden">
       
+      {/* --- MOBILE FULL-SCREEN MENU OVERLAY --- */}
+      <div className={`fixed inset-0 z-[100] bg-[#FCFBF8]/95 backdrop-blur-3xl transition-all duration-500 flex flex-col ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}>
+        <div className="flex items-center justify-between px-4 lg:px-8 h-20 md:h-24 border-b border-[#D4AF37]/20">
+          <div className="font-serif text-xl tracking-[0.2em] font-black uppercase text-[#1A1A1A]">POLARIS</div>
+          <button onClick={() => setIsMobileMenuOpen(false)} className="text-[#1A1A1A] p-2 focus:outline-none">
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+        <div className="flex flex-col items-center justify-center flex-grow space-y-10 text-base font-black uppercase tracking-[0.2em] text-[#1A1A1A]">
+          <a href="https://polarismicroblading.glossgenius.com/services" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4AF37] transition-colors">Treatments</a>
+          <a href="/portfolio" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4AF37] transition-colors">Portfolio</a>
+          <a href="#meet-janna" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4AF37] transition-colors">Meet Janna</a>
+          <a href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4AF37] transition-colors">Contact</a>
+          <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="mt-6 bg-[#1A1A1A] text-white hover:bg-[#D4AF37] px-12 py-5 rounded-sm text-xs shadow-[0_20px_40px_rgba(212,175,55,0.2)] transition-colors">Book Now</a>
+        </div>
+      </div>
+
       {/* 1. ULTRA-LUX NAVIGATION BAR */}
       <nav className="fixed w-full z-50 bg-white/70 backdrop-blur-2xl border-b border-[#D4AF37]/20 transition-all duration-500 shadow-[0_10px_30px_rgba(0,0,0,0.03)]">
         <div className="max-w-[1400px] mx-auto px-4 lg:px-8 h-20 md:h-24 flex items-center justify-between">
           
           <div className="flex lg:hidden w-full items-center justify-between relative">
-            <button className="text-[#1A1A1A] hover:text-[#D4AF37] transition-colors focus:outline-none">
+            <button onClick={() => setIsMobileMenuOpen(true)} className="text-[#1A1A1A] hover:text-[#D4AF37] transition-colors focus:outline-none">
               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
             <div className="absolute left-1/2 transform -translate-x-1/2 font-serif text-xl tracking-[0.2em] font-black uppercase text-[#1A1A1A]">
@@ -173,7 +206,7 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* 2. THE MILLION-DOLLAR HERO SECTION (MOBILE OPTIMIZED) */}
+      {/* 2. THE MILLION-DOLLAR HERO SECTION */}
       <section className="relative pt-24 pb-12 lg:pt-40 lg:pb-32 overflow-hidden bg-[#FCFBF8] clip-chevron-bottom z-20">
         <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] bg-[#D4AF37]/10 rounded-full blur-[120px] pointer-events-none animate-pulse"></div>
         <div className="absolute bottom-[-10%] right-[-5%] w-[500px] h-[500px] bg-[#E6C5C0]/20 rounded-full blur-[150px] pointer-events-none"></div>
@@ -282,20 +315,19 @@ export default function Home() {
           </div>
       </section>
 
-      {/* 5. MIND-BLOWING BENTO GRID MENU (CENTERED TITLE) */}
+      {/* 5. MIND-BLOWING BENTO GRID MENU */}
       <section id="services" className="py-24 lg:py-36 bg-white relative z-20 overflow-hidden">
         <div className="absolute top-[-10%] right-[-10%] w-[800px] h-[800px] bg-gradient-to-bl from-[#D4AF37]/10 via-[#FAF6F0] to-transparent rounded-full blur-[100px] animate-spin-slow pointer-events-none"></div>
         <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-gradient-to-tr from-[#E6C5C0]/20 to-transparent rounded-full blur-[120px] pointer-events-none"></div>
 
         <div className="max-w-[1400px] mx-auto px-4 lg:px-8 relative z-10">
           
-          {/* CENTERED TITLE */}
-          <div className="flex flex-col items-center text-center mb-16 border-b border-[#D4AF37]/20 pb-8">
+          <div className="flex flex-col items-center text-center mb-16 border-b border-[#D4AF37]/20 pb-10">
              <h4 className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.3em] mb-4 flex items-center justify-center gap-3">
                 <span className="w-6 h-px bg-[#D4AF37]"></span> Curated Artistry <span className="w-6 h-px bg-[#D4AF37]"></span>
              </h4>
-             <h2 className="text-4xl md:text-6xl font-serif text-[#1A1A1A] tracking-tight mb-6">Signature <span className="italic">Treatments.</span></h2>
-             <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="inline-flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors group bg-[#FAF6F0] px-6 py-3 rounded-full border border-[#D4AF37]/20">
+             <h2 className="text-4xl md:text-6xl font-serif text-[#1A1A1A] tracking-tight mb-6">Signature <span className="italic text-[#D4AF37]">Treatments.</span></h2>
+             <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="inline-flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors group bg-[#FAF6F0] px-8 py-4 rounded-full border border-[#D4AF37]/20 shadow-sm hover:shadow-[0_10px_20px_rgba(212,175,55,0.1)]">
                View Full Booking Menu <span className="group-hover:translate-x-1 transition-transform">→</span>
              </a>
           </div>
@@ -514,76 +546,60 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 7. SWIPEABLE + AUTO-SCROLLING MARQUEE REVIEWS */}
-      <section className="py-20 bg-white clip-diagonal-bottom relative z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.02)]">
-         <div className="text-center mb-12">
-             <h3 className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.3em] mb-2">Client Experiences</h3>
-             <h2 className="text-[#1A1A1A] text-3xl font-serif">A Reputation Built on <span className="italic text-gray-400">Trust</span></h2>
+      {/* 7. RE-ENGINEERED 2M DOLLAR MARQUEE (AUTO-SCROLL + SWIPE) */}
+      <section className="py-24 lg:py-36 bg-[#FCFBF8] clip-diagonal-bottom relative z-20 overflow-hidden border-t border-[#D4AF37]/10">
+         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#D4AF37]/5 rounded-full blur-[100px] pointer-events-none z-0"></div>
+         
+         <div className="text-center mb-16 relative z-10">
+             <h3 className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.3em] mb-4 flex items-center justify-center gap-3">
+                 <span className="w-6 h-px bg-[#D4AF37]"></span> Client Experiences <span className="w-6 h-px bg-[#D4AF37]"></span>
+             </h3>
+             <h2 className="text-[#1A1A1A] text-4xl md:text-6xl font-serif tracking-tight">A Reputation Built on <span className="italic text-[#D4AF37]">Trust.</span></h2>
          </div>
          
          <div 
            ref={marqueeRef}
-           onMouseDown={handleMouseDown}
-           onMouseLeave={handleMouseLeave}
-           onMouseUp={handleMouseUp}
-           onMouseMove={handleDragMove}
-           className="flex overflow-x-auto no-scrollbar gap-6 px-4 snap-x cursor-grab active:cursor-grabbing pb-10"
+           onMouseDown={onMarqueeMouseDown}
+           onMouseLeave={onMarqueeMouseLeave}
+           onMouseUp={onMarqueeMouseUp}
+           onMouseMove={onMarqueeMouseMove}
+           onMouseEnter={() => setIsMarqueePaused(true)}
+           onTouchStart={() => setIsMarqueePaused(true)}
+           onTouchEnd={() => setTimeout(() => setIsMarqueePaused(false), 1500)}
+           className="flex overflow-x-auto gap-6 px-4 md:px-8 pb-16 snap-x snap-mandatory relative z-10 [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)] cursor-grab active:cursor-grabbing"
            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
          >
-            {[...Array(4)].map((_, arrayIndex) => (
-              <div key={arrayIndex} className="flex gap-6 flex-none">
-                
-                <a href="https://maps.app.goo.gl/SYMzModDM8EXBM6F7" target="_blank" rel="noreferrer" className="inline-block w-[320px] sm:w-[400px] bg-[#FCFBF8] p-8 rounded-sm border border-[#D4AF37]/20 hover:border-[#D4AF37] shadow-sm hover:shadow-[0_10px_30px_rgba(212,175,55,0.1)] transition-all whitespace-normal transform hover:-translate-y-1 snap-center">
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="w-10 h-10 rounded-full bg-[#1A1A1A] text-[#D4AF37] flex items-center justify-center font-serif text-lg flex-shrink-0">A</div>
-                        <div>
-                            <p className="font-bold text-xs text-[#1A1A1A] uppercase tracking-widest">Anna</p>
-                            <div className="text-[#D4AF37] text-[10px] tracking-widest mt-1">★★★★★</div>
-                        </div>
-                    </div>
-                    <p className="text-gray-500 text-sm leading-relaxed mb-6 font-medium italic">"Amazing experience! Janna was so professional, thorough, knowledgeable, personable and TALENTED! Absolutely love my brows!!"</p>
-                    <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-                      <span className="text-[#1A1A1A] font-black text-[9px] uppercase tracking-[0.2em] hover:text-[#D4AF37] transition-colors">Read on Google →</span>
-                      <span className="text-[#D4AF37] text-[9px] font-black uppercase tracking-widest flex items-center gap-1">✓ Verified</span>
-                    </div>
-                </a>
-                
-                <a href="https://www.google.com/maps/place/Polaris+Aesthetics/@40.1442707,-82.9914008,17z/data=!3m1!4b1!4m6!3m5!1s0x8838f52e99680d51:0x15b295572df54161!8m2!3d40.1442707!4d-82.9888259!16s%2Fg%2F11jnf_hb4q?entry=ttu&g_ep=EgoyMDI2MDIyMy4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noreferrer" className="inline-block w-[320px] sm:w-[400px] bg-[#FCFBF8] p-8 rounded-sm border border-[#D4AF37]/20 hover:border-[#D4AF37] shadow-sm hover:shadow-[0_10px_30px_rgba(212,175,55,0.1)] transition-all whitespace-normal transform hover:-translate-y-1 snap-center">
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="w-10 h-10 rounded-full bg-[#1A1A1A] text-[#D4AF37] flex items-center justify-center font-serif text-lg flex-shrink-0">S</div>
-                        <div>
-                            <p className="font-bold text-xs text-[#1A1A1A] uppercase tracking-widest">Susana Cuero</p>
-                            <div className="text-[#D4AF37] text-[10px] tracking-widest mt-1">★★★★★</div>
-                        </div>
-                    </div>
-                    <p className="text-gray-500 text-sm leading-relaxed mb-6 font-medium italic">"The service is excellent!!! You get what you expect!!! 😍😍😍 plus you feel like if you were in a SPA 🧘‍♀️."</p>
-                    <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-                      <span className="text-[#1A1A1A] font-black text-[9px] uppercase tracking-[0.2em] hover:text-[#D4AF37] transition-colors">Read on Google →</span>
-                      <span className="text-[#D4AF37] text-[9px] font-black uppercase tracking-widest flex items-center gap-1">✓ Verified</span>
-                    </div>
-                </a>
+            {/* Duplicated 3 times for a seamless infinite loop feel */}
+            {[...reviewsData, ...reviewsData, ...reviewsData].map((review, arrayIndex) => (
+              <a 
+                key={arrayIndex} 
+                href={review.link} 
+                target="_blank" 
+                rel="noreferrer" 
+                className="flex-none w-[85vw] sm:w-[450px] bg-white border border-[#D4AF37]/20 p-10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.03)] hover:shadow-[0_30px_60px_rgba(212,175,55,0.15)] hover:-translate-y-2 transition-all duration-500 relative overflow-hidden group snap-center"
+              >
+                  <span className="absolute -top-6 -left-2 text-[140px] text-[#D4AF37] opacity-[0.05] font-serif leading-none group-hover:opacity-[0.08] transition-opacity duration-500 pointer-events-none">"</span>
 
-                <a href="https://maps.app.goo.gl/SYMzModDM8EXBM6F7" target="_blank" rel="noreferrer" className="inline-block w-[320px] sm:w-[400px] bg-[#FCFBF8] p-8 rounded-sm border border-[#D4AF37]/20 hover:border-[#D4AF37] shadow-sm hover:shadow-[0_10px_30px_rgba(212,175,55,0.1)] transition-all whitespace-normal transform hover:-translate-y-1 snap-center">
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="w-10 h-10 rounded-full bg-[#1A1A1A] text-[#D4AF37] flex items-center justify-center font-serif text-lg flex-shrink-0">W</div>
-                        <div>
-                            <p className="font-bold text-xs text-[#1A1A1A] uppercase tracking-widest">Wendy</p>
-                            <div className="text-[#D4AF37] text-[10px] tracking-widest mt-1">★★★★★</div>
-                        </div>
-                    </div>
-                    <p className="text-gray-500 text-sm leading-relaxed mb-6 font-medium italic">"Janna was very professional and made me feel very comfortable... She was very thorough in explaining the process and aftercare."</p>
-                    <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-                      <span className="text-[#1A1A1A] font-black text-[9px] uppercase tracking-[0.2em] hover:text-[#D4AF37] transition-colors">Read on Google →</span>
-                      <span className="text-[#D4AF37] text-[9px] font-black uppercase tracking-widest flex items-center gap-1">✓ Verified</span>
-                    </div>
-                </a>
-
-              </div>
+                  <div className="relative z-10 flex flex-col h-full justify-between">
+                      <div className="flex items-center gap-4 mb-8">
+                          <div className="w-12 h-12 rounded-full bg-[#FCFBF8] border border-[#D4AF37]/30 text-[#D4AF37] flex items-center justify-center font-serif text-xl flex-shrink-0 shadow-inner">{review.initial}</div>
+                          <div>
+                              <p className="font-black text-sm text-[#1A1A1A] uppercase tracking-widest">{review.name}</p>
+                              <div className="flex gap-1 mt-1 text-[#D4AF37] text-[10px]">★★★★★</div>
+                          </div>
+                      </div>
+                      <p className="text-gray-600 text-sm md:text-base leading-relaxed font-medium italic mb-8 flex-grow">"{review.text}"</p>
+                      <div className="flex items-center justify-between border-t border-[#D4AF37]/10 pt-6">
+                          <span className="text-[#1A1A1A] font-black text-[9px] uppercase tracking-[0.2em] group-hover:text-[#D4AF37] transition-colors flex items-center gap-2">Read on Google <span className="text-[12px]">→</span></span>
+                          <span className="bg-[#FAF6F0] border border-[#D4AF37]/20 text-[#D4AF37] text-[8px] px-3 py-1.5 rounded-full font-black uppercase tracking-widest flex items-center gap-1">✓ Verified</span>
+                      </div>
+                  </div>
+              </a>
             ))}
          </div>
       </section>
 
-      {/* 8. INTERACTIVE BEFORE & AFTER SLIDER */}
+      {/* 8. INTERACTIVE BEFORE & AFTER SLIDER (LOCAL IMAGES) */}
       <section className="py-24 lg:py-32 bg-[#FCFBF8] relative z-10">
         <div className="max-w-[1400px] mx-auto px-4 lg:px-6">
           <div className="text-center mb-16">
@@ -596,13 +612,13 @@ export default function Home() {
             <div 
               ref={sliderRef}
               className="relative z-10 w-full aspect-[4/5] sm:aspect-square rounded-sm overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.1)] border-[8px] border-white cursor-ew-resize select-none bg-gray-100"
-              onMouseMove={onMouseMove}
-              onTouchMove={onTouchMove}
-              onMouseDown={(e) => { setIsDragging(true); handleMove(e.clientX); }}
-              onMouseUp={() => setIsDragging(false)}
-              onMouseLeave={() => setIsDragging(false)}
-              onTouchStart={(e) => { setIsDragging(true); handleMove(e.touches[0].clientX); }}
-              onTouchEnd={() => setIsDragging(false)}
+              onMouseMove={onSliderMouseMove}
+              onTouchMove={onSliderTouchMove}
+              onMouseDown={(e) => { setIsDraggingSlider(true); handleSliderMove(e.clientX); }}
+              onMouseUp={() => setIsDraggingSlider(false)}
+              onMouseLeave={() => setIsDraggingSlider(false)}
+              onTouchStart={(e) => { setIsDraggingSlider(true); handleSliderMove(e.touches[0].clientX); }}
+              onTouchEnd={() => setIsDraggingSlider(false)}
             >
               <img src="/before.jpg" className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none grayscale opacity-70" alt="Before Brows" draggable="false" />
               <img src="/after.jpg" className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none" style={{ clipPath: `polygon(0 0, ${sliderPosition}% 0, ${sliderPosition}% 100%, 0 100%)` }} alt="After Brows" draggable="false" />
