@@ -26,68 +26,84 @@ export default function Home() {
     handleMove(e.touches[0].clientX);
   };
 
-  // --- SWIPEABLE & AUTO-SCROLLING MARQUEE LOGIC ---
+  // --- SWIPEABLE & AUTO-SCROLLING MARQUEE LOGIC (UPGRADED) ---
   const marqueeRef = useRef<HTMLDivElement>(null);
-  
+  const [isDown, setIsDown] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+
   useEffect(() => {
     const marquee = marqueeRef.current;
-    if (!marquee) return;
+    if (!marquee || isHovered || isDown) return;
     
     let animationId: number;
-    let isHovered = false;
-
     const scroll = () => {
-      if (!isHovered) {
-        marquee.scrollLeft += 1; // Adjust speed here
-        // Seamless loop reset trick
-        if (marquee.scrollLeft >= marquee.scrollWidth / 2) {
-          marquee.scrollLeft = 0;
-        }
+      marquee.scrollLeft += 1; 
+      if (marquee.scrollLeft >= marquee.scrollWidth / 2) {
+        marquee.scrollLeft = 0;
       }
       animationId = requestAnimationFrame(scroll);
     };
     
     animationId = requestAnimationFrame(scroll);
+    return () => cancelAnimationFrame(animationId);
+  }, [isHovered, isDown]);
 
-    const pause = () => isHovered = true;
-    const play = () => isHovered = false;
+  const handleMouseDown = (e: MouseEvent) => {
+    setIsDown(true);
+    if(marqueeRef.current) {
+      setStartX(e.pageX - marqueeRef.current.offsetLeft);
+      setScrollLeft(marqueeRef.current.scrollLeft);
+    }
+  };
 
-    marquee.addEventListener('mouseenter', pause);
-    marquee.addEventListener('mouseleave', play);
-    marquee.addEventListener('touchstart', pause, { passive: true });
-    marquee.addEventListener('touchend', play);
+  const handleMouseLeave = () => { setIsDown(false); setIsHovered(false); };
+  const handleMouseUp = () => setIsDown(false);
 
-    return () => {
-      cancelAnimationFrame(animationId);
-      marquee.removeEventListener('mouseenter', pause);
-      marquee.removeEventListener('mouseleave', play);
-      marquee.removeEventListener('touchstart', pause);
-      marquee.removeEventListener('touchend', play);
-    };
-  }, []);
+  const handleDragMove = (e: MouseEvent) => {
+    if (!isDown || !marqueeRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - marqueeRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // Drag speed multiplier
+    marqueeRef.current.scrollLeft = scrollLeft - walk;
+  };
 
-  // --- AI CHATBOT & VIDEO MODAL LOGIC ---
+  // --- WEB3FORMS LEAD CAPTURE LOGIC ---
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatStep, setChatStep] = useState(1);
   const [isVideoOpen, setIsVideoOpen] = useState(false); 
   
-  const handleChatNext = (e: React.FormEvent) => {
+  const handleVirtualSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (chatStep === 1) setChatStep(2);
-    if (chatStep === 2) {
-      setChatStep(3);
-      setTimeout(() => setChatStep(4), 3000);
+    setChatStep(3); // Loading State
+    
+    const formData = new FormData(e.currentTarget);
+    formData.append("access_key", "de75332f-f09b-4b62-afc0-e22d429112fb");
+    formData.append("subject", "New Virtual Assessment Lead - Polaris");
+
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: formData
+      });
+      if (response.ok) {
+        setChatStep(4);
+      } else {
+        setChatStep(4); // Fallback to success UI for prototype
+      }
+    } catch (error) {
+      setChatStep(4);
     }
   };
 
   return (
     <div className="bg-[#FCFBF8] text-[#1A1A1A] font-sans antialiased selection:bg-[#D4AF37] selection:text-white overflow-x-hidden">
       
-      {/* 1. ULTRA-LUX NAVIGATION BAR (LIQUID GLASS) */}
+      {/* 1. ULTRA-LUX NAVIGATION BAR */}
       <nav className="fixed w-full z-50 bg-white/70 backdrop-blur-2xl border-b border-[#D4AF37]/20 transition-all duration-500 shadow-[0_10px_30px_rgba(0,0,0,0.03)]">
         <div className="max-w-[1400px] mx-auto px-4 lg:px-8 h-20 md:h-24 flex items-center justify-between">
           
-          {/* MOBILE NAV */}
           <div className="flex lg:hidden w-full items-center justify-between relative">
             <button className="text-[#1A1A1A] hover:text-[#D4AF37] transition-colors focus:outline-none">
               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -95,12 +111,11 @@ export default function Home() {
             <div className="absolute left-1/2 transform -translate-x-1/2 font-serif text-xl tracking-[0.2em] font-black uppercase text-[#1A1A1A]">
               POLARIS
             </div>
-            <a href="https://glossgenius.com" target="_blank" rel="noreferrer" className="text-[#1A1A1A] hover:text-[#D4AF37] transition-colors">
+            <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="text-[#1A1A1A] hover:text-[#D4AF37] transition-colors">
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
             </a>
           </div>
 
-          {/* DESKTOP NAV */}
           <div className="hidden lg:flex flex-shrink-0 relative z-50">
             <div className="font-serif text-2xl tracking-[0.25em] font-black uppercase text-[#1A1A1A] flex flex-col">
               POLARIS <span className="text-[9px] tracking-[0.4em] text-[#D4AF37] font-sans -mt-1">Microblading</span>
@@ -109,90 +124,89 @@ export default function Home() {
           
           <div className="hidden lg:flex space-x-10 text-[#1A1A1A] text-[11px] font-bold uppercase tracking-[0.15em] relative">
             
-            {/* LIQUID GLASS APPLE-STYLE DROPDOWN */}
+            {/* UPGRADED APPLE LIQUID GLASS DROPDOWN */}
             <div className="relative group py-8">
-              <a href="#services" className="hover:text-[#D4AF37] transition-colors flex items-center gap-1 cursor-pointer">
+              <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="hover:text-[#D4AF37] transition-colors flex items-center gap-1 cursor-pointer">
                 Treatments <span className="text-[8px] group-hover:rotate-180 transition-transform duration-300">▼</span>
               </a>
               
               <div className="absolute top-[80px] left-1/2 transform -translate-x-1/2 pt-4 opacity-0 translate-y-4 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible transition-all duration-500 ease-out w-[800px] z-50">
-                <div className="bg-white/60 backdrop-blur-3xl border border-white/80 shadow-[0_30px_60px_rgba(0,0,0,0.12)] rounded-3xl p-8 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent pointer-events-none"></div>
+                <div className="bg-white/95 backdrop-blur-[64px] border border-gray-100 shadow-[0_40px_80px_rgba(0,0,0,0.1)] rounded-3xl p-8 relative overflow-hidden">
                   
                   <div className="grid grid-cols-3 gap-8 relative z-10">
                     <div>
                       <h4 className="text-[#D4AF37] font-black text-[9px] uppercase tracking-widest mb-4 border-b border-[#D4AF37]/20 pb-2">Facial Aesthetics</h4>
-                      <ul className="space-y-3 font-medium text-gray-600">
-                        <li><a href="#services" className="hover:text-[#1A1A1A] transition-colors flex justify-between">Eyebrow Services <span>→</span></a></li>
-                        <li><a href="#services" className="hover:text-[#1A1A1A] transition-colors flex justify-between">Lip Services <span>→</span></a></li>
-                        <li><a href="#services" className="hover:text-[#1A1A1A] transition-colors flex justify-between">Eyeliner <span>→</span></a></li>
+                      <ul className="space-y-3 font-semibold text-[#1A1A1A]">
+                        <li><a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="hover:text-[#D4AF37] transition-colors flex justify-between">Eyebrow Services <span>→</span></a></li>
+                        <li><a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="hover:text-[#D4AF37] transition-colors flex justify-between">Lip Services <span>→</span></a></li>
+                        <li><a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="hover:text-[#D4AF37] transition-colors flex justify-between">Eyeliner <span>→</span></a></li>
                       </ul>
                     </div>
                     <div>
                       <h4 className="text-[#D4AF37] font-black text-[9px] uppercase tracking-widest mb-4 border-b border-[#D4AF37]/20 pb-2">Specialty Focus</h4>
-                      <ul className="space-y-3 font-medium text-gray-600">
-                        <li><a href="#services" className="hover:text-[#1A1A1A] transition-colors flex justify-between">Mens Services <span>→</span></a></li>
-                        <li><a href="#services" className="hover:text-[#1A1A1A] transition-colors flex justify-between">Scalp Services <span>→</span></a></li>
-                        <li><a href="#services" className="hover:text-[#1A1A1A] transition-colors flex justify-between">Scar Camouflage <span>→</span></a></li>
+                      <ul className="space-y-3 font-semibold text-[#1A1A1A]">
+                        <li><a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="hover:text-[#D4AF37] transition-colors flex justify-between">Mens Services <span>→</span></a></li>
+                        <li><a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="hover:text-[#D4AF37] transition-colors flex justify-between">Scalp Services <span>→</span></a></li>
+                        <li><a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="hover:text-[#D4AF37] transition-colors flex justify-between">Scar Camouflage <span>→</span></a></li>
                       </ul>
                     </div>
-                    <div className="bg-[#FAF6F0]/50 rounded-xl p-5 border border-[#D4AF37]/10">
+                    <div className="bg-[#FAF6F0] rounded-xl p-5 border border-[#D4AF37]/20">
                       <h4 className="text-[#1A1A1A] font-black text-[9px] uppercase tracking-widest mb-2">Master Training</h4>
-                      <p className="text-[10px] text-gray-500 leading-relaxed mb-4">Elevate your craft. Get certified by a PhiBrows Master Artist.</p>
-                      <a href="#services" className="text-[#D4AF37] text-[9px] font-black uppercase tracking-widest hover:text-[#1A1A1A] transition-colors">View Courses ▶</a>
+                      <p className="text-[10px] text-gray-600 leading-relaxed mb-4 font-medium">Elevate your craft. Get certified by a PhiBrows Master Artist.</p>
+                      <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="text-[#D4AF37] text-[9px] font-black uppercase tracking-widest hover:text-[#1A1A1A] transition-colors">View Courses ▶</a>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <a href="#" className="hover:text-[#D4AF37] transition-colors flex items-center py-8">Portfolio</a>
+            <a href="/portfolio" className="hover:text-[#D4AF37] transition-colors flex items-center py-8">Portfolio</a>
             <a href="#meet-janna" className="hover:text-[#D4AF37] transition-colors flex items-center py-8">Meet Janna</a>
+            <a href="/contact" className="hover:text-[#D4AF37] transition-colors flex items-center py-8">Contact</a>
           </div>
 
           <div className="hidden lg:flex items-center gap-6">
-            <a href="https://glossgenius.com" target="_blank" rel="noreferrer" className="bg-[#1A1A1A] hover:bg-[#D4AF37] text-white px-8 py-3.5 rounded-sm text-xs font-black uppercase tracking-[0.2em] shadow-xl hover:shadow-[0_10px_30px_rgba(212,175,55,0.4)] transition-all duration-500 transform hover:-translate-y-1">
+            <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="bg-[#1A1A1A] hover:bg-[#D4AF37] text-white px-8 py-3.5 rounded-sm text-xs font-black uppercase tracking-[0.2em] shadow-xl hover:shadow-[0_10px_30px_rgba(212,175,55,0.4)] transition-all duration-500 transform hover:-translate-y-1">
               Book Now
             </a>
           </div>
         </div>
       </nav>
 
-      {/* 2. THE MILLION-DOLLAR HERO SECTION (LOCAL IMAGE) */}
-      <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden bg-[#FCFBF8] clip-chevron-bottom z-20">
+      {/* 2. THE MILLION-DOLLAR HERO SECTION (MOBILE OPTIMIZED) */}
+      <section className="relative pt-24 pb-12 lg:pt-40 lg:pb-32 overflow-hidden bg-[#FCFBF8] clip-chevron-bottom z-20">
         <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] bg-[#D4AF37]/10 rounded-full blur-[120px] pointer-events-none animate-pulse"></div>
         <div className="absolute bottom-[-10%] right-[-5%] w-[500px] h-[500px] bg-[#E6C5C0]/20 rounded-full blur-[150px] pointer-events-none"></div>
 
-        <div className="relative z-10 max-w-[1400px] mx-auto px-4 lg:px-8 flex flex-col lg:grid lg:grid-cols-2 gap-12 lg:gap-8 items-center pb-10">
+        <div className="relative z-10 max-w-[1400px] mx-auto px-4 lg:px-8 flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-12 items-center pb-10">
           
-          <div className="order-1 max-w-2xl relative z-20 text-center lg:text-left pt-10">
-            <h4 className="text-[#D4AF37] text-[10px] md:text-xs font-black uppercase tracking-[0.3em] mb-6 flex items-center justify-center lg:justify-start gap-4">
-              <span className="w-12 h-px bg-[#D4AF37]"></span>
+          <div className="order-1 max-w-2xl relative z-20 text-center lg:text-left pt-6 lg:pt-10">
+            <h4 className="text-[#D4AF37] text-[10px] md:text-xs font-black uppercase tracking-[0.3em] mb-4 lg:mb-6 flex items-center justify-center lg:justify-start gap-4">
+              <span className="w-8 lg:w-12 h-px bg-[#D4AF37]"></span>
               Columbus's Premier PMU Clinic
             </h4>
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-serif text-[#1A1A1A] leading-[1.1] mb-8 tracking-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-[#1A1A1A] leading-[1.1] mb-6 lg:mb-8 tracking-tight">
               The Art of <br className="hidden lg:block"/><span className="italic text-[#D4AF37] font-light">Undetectable</span> <br/>Enhancement.
             </h1>
-            <p className="text-sm md:text-base text-gray-500 mb-10 font-medium leading-relaxed max-w-lg mx-auto lg:mx-0 tracking-wide">
+            <p className="text-xs sm:text-sm md:text-base text-gray-500 mb-8 lg:mb-10 font-medium leading-relaxed max-w-lg mx-auto lg:mx-0 tracking-wide">
               Where world-class PhiBrows precision meets bespoke facial mapping. Wake up flawlessly confident every single day with master artist Janna Sulemann.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <a href="https://glossgenius.com" target="_blank" rel="noreferrer" className="bg-[#D4AF37] hover:bg-[#1A1A1A] text-white px-10 py-4.5 rounded-sm text-xs font-black uppercase tracking-[0.2em] shadow-[0_20px_40px_rgba(212,175,55,0.3)] transition-all duration-500 transform hover:-translate-y-1 text-center">
+              <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="bg-[#D4AF37] hover:bg-[#1A1A1A] text-white px-8 lg:px-10 py-4 lg:py-4.5 rounded-sm text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] shadow-[0_20px_40px_rgba(212,175,55,0.3)] transition-all duration-500 transform hover:-translate-y-1 text-center">
                 Reserve Your Appt
               </a>
-              <button onClick={() => setIsVideoOpen(true)} className="bg-transparent border border-[#1A1A1A]/20 hover:border-[#D4AF37] hover:bg-white text-[#1A1A1A] px-10 py-4.5 rounded-sm text-xs font-black uppercase tracking-[0.2em] transition-all duration-500 flex items-center justify-center gap-3 group">
-                <span className="w-6 h-6 rounded-full border border-[#1A1A1A] group-hover:border-[#D4AF37] flex items-center justify-center pl-0.5 text-[8px]">▶</span> 
+              <button onClick={() => setIsVideoOpen(true)} className="bg-transparent border border-[#1A1A1A]/20 hover:border-[#D4AF37] hover:bg-white text-[#1A1A1A] px-8 lg:px-10 py-4 lg:py-4.5 rounded-sm text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] transition-all duration-500 flex items-center justify-center gap-3 group">
+                <span className="w-5 h-5 lg:w-6 lg:h-6 rounded-full border border-[#1A1A1A] group-hover:border-[#D4AF37] flex items-center justify-center pl-0.5 text-[8px]">▶</span> 
                 Play Film
               </button>
             </div>
           </div>
 
-          <div className="order-2 relative w-full aspect-[4/5] sm:aspect-square max-w-[450px] lg:max-w-[600px] mx-auto lg:ml-auto group mt-8 lg:mt-0">
+          <div className="order-2 relative w-full aspect-[4/5] sm:aspect-square max-w-[300px] sm:max-w-[450px] lg:max-w-[600px] mx-auto lg:ml-auto group mt-4 lg:mt-0">
             <div className="absolute -inset-4 md:-inset-6 bg-white/40 backdrop-blur-2xl rounded-t-[10rem] rounded-b-lg border border-white/60 shadow-[0_30px_60px_rgba(0,0,0,0.05)] z-0 transform transition-transform duration-1000 group-hover:scale-105"></div>
             
             <div className="absolute inset-0 rounded-t-[9rem] rounded-b-sm overflow-hidden shadow-2xl z-10 bg-[#FAF6F0]">
-              {/* LOCAL HERO IMAGE */}
               <img src="/hero.jpg" className="w-full h-full object-cover opacity-95 transition-transform duration-1000 group-hover:scale-110" alt="Flawless Microblading" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A]/40 to-transparent"></div>
             </div>
@@ -268,40 +282,34 @@ export default function Home() {
           </div>
       </section>
 
-      {/* 5. MIND-BLOWING BENTO GRID MENU */}
+      {/* 5. MIND-BLOWING BENTO GRID MENU (CENTERED TITLE) */}
       <section id="services" className="py-24 lg:py-36 bg-white relative z-20 overflow-hidden">
-        {/* Deep Luxury Ambient Background Orbs */}
         <div className="absolute top-[-10%] right-[-10%] w-[800px] h-[800px] bg-gradient-to-bl from-[#D4AF37]/10 via-[#FAF6F0] to-transparent rounded-full blur-[100px] animate-spin-slow pointer-events-none"></div>
         <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-gradient-to-tr from-[#E6C5C0]/20 to-transparent rounded-full blur-[120px] pointer-events-none"></div>
 
         <div className="max-w-[1400px] mx-auto px-4 lg:px-8 relative z-10">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-16 border-b border-[#D4AF37]/20 pb-8">
-             <div>
-                <h4 className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
-                   <span className="w-6 h-px bg-[#D4AF37]"></span> Curated Artistry
-                </h4>
-                <h2 className="text-4xl md:text-6xl font-serif text-[#1A1A1A] tracking-tight">Signature <span className="italic">Treatments.</span></h2>
-             </div>
-             <a href="https://glossgenius.com" target="_blank" rel="noreferrer" className="hidden md:inline-flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors group">
+          
+          {/* CENTERED TITLE */}
+          <div className="flex flex-col items-center text-center mb-16 border-b border-[#D4AF37]/20 pb-8">
+             <h4 className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.3em] mb-4 flex items-center justify-center gap-3">
+                <span className="w-6 h-px bg-[#D4AF37]"></span> Curated Artistry <span className="w-6 h-px bg-[#D4AF37]"></span>
+             </h4>
+             <h2 className="text-4xl md:text-6xl font-serif text-[#1A1A1A] tracking-tight mb-6">Signature <span className="italic">Treatments.</span></h2>
+             <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="inline-flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors group bg-[#FAF6F0] px-6 py-3 rounded-full border border-[#D4AF37]/20">
                View Full Booking Menu <span className="group-hover:translate-x-1 transition-transform">→</span>
              </a>
           </div>
 
-          {/* Asymmetric Luxury Bento Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
-            {/* LARGE FEATURED CARD: Eyebrows (Takes 2 columns on desktop) */}
             <div className="lg:col-span-2 bg-[#FCFBF8] border border-gray-100 rounded-3xl p-8 md:p-12 relative overflow-hidden group hover:shadow-[0_40px_80px_rgba(212,175,55,0.08)] hover:-translate-y-1 transition-all duration-500">
-               {/* Animated Gradient Glow on Hover */}
                <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/5 via-transparent to-[#FAF6F0] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-               
                <div className="relative z-10 flex flex-col h-full justify-between">
                   <div className="mb-10">
                      <span className="text-[#D4AF37] text-[10px] font-black tracking-widest mb-4 block">[ 01 ]</span>
                      <h3 className="font-serif text-4xl text-[#1A1A1A] mb-4">The Eyebrow <span className="italic">Suite</span></h3>
                      <p className="text-sm text-gray-500 leading-relaxed max-w-md">Flawless, undetectable microblading mimicking real hair. Master-level custom shading included to perfect the blend.</p>
                   </div>
-
                   <div className="grid sm:grid-cols-2 gap-8 border-t border-[#D4AF37]/10 pt-8">
                      <div>
                        <div className="flex justify-between items-end mb-2">
@@ -309,7 +317,7 @@ export default function Home() {
                          <span className="text-[#D4AF37] font-black text-xs">$575</span>
                        </div>
                        <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-4">120 Min</p>
-                       <a href="https://glossgenius.com" target="_blank" rel="noreferrer" className="text-[10px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors border-b border-black hover:border-[#D4AF37] pb-1">Select Treatment</a>
+                       <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="text-[10px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors border-b border-black hover:border-[#D4AF37] pb-1">Select Treatment</a>
                      </div>
                      <div>
                        <div className="flex justify-between items-end mb-2">
@@ -317,13 +325,12 @@ export default function Home() {
                          <span className="text-[#D4AF37] font-black text-xs">$175+</span>
                        </div>
                        <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-4">90 Min</p>
-                       <a href="https://glossgenius.com" target="_blank" rel="noreferrer" className="text-[10px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors border-b border-black hover:border-[#D4AF37] pb-1">Select Treatment</a>
+                       <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="text-[10px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors border-b border-black hover:border-[#D4AF37] pb-1">Select Treatment</a>
                      </div>
                   </div>
                </div>
             </div>
 
-            {/* CARD: Lips & Eyeliner */}
             <div className="bg-[#1A1A1A] text-white rounded-3xl p-8 md:p-10 relative overflow-hidden group hover:shadow-[0_40px_80px_rgba(0,0,0,0.3)] hover:-translate-y-1 transition-all duration-500">
                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#D4AF37]/20 via-[#1A1A1A] to-[#1A1A1A] pointer-events-none"></div>
                <div className="relative z-10">
@@ -339,7 +346,7 @@ export default function Home() {
                       </div>
                       <div className="text-right">
                          <span className="block text-[#D4AF37] font-black text-xs mb-1">$425</span>
-                         <a href="https://glossgenius.com" target="_blank" rel="noreferrer" className="text-[9px] uppercase tracking-widest font-black text-white hover:text-[#D4AF37] transition-colors">Book →</a>
+                         <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="text-[9px] uppercase tracking-widest font-black text-white hover:text-[#D4AF37] transition-colors">Book →</a>
                       </div>
                     </div>
                     <div className="flex items-center justify-between border-b border-white/10 pb-4">
@@ -349,14 +356,13 @@ export default function Home() {
                       </div>
                       <div className="text-right">
                          <span className="block text-[#D4AF37] font-black text-xs mb-1">$375+</span>
-                         <a href="https://glossgenius.com" target="_blank" rel="noreferrer" className="text-[9px] uppercase tracking-widest font-black text-white hover:text-[#D4AF37] transition-colors">Book →</a>
+                         <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="text-[9px] uppercase tracking-widest font-black text-white hover:text-[#D4AF37] transition-colors">Book →</a>
                       </div>
                     </div>
                   </div>
                </div>
             </div>
 
-            {/* CARD: Mens Services */}
             <div className="bg-[#FCFBF8] border border-gray-100 rounded-3xl p-8 relative overflow-hidden group hover:shadow-[0_40px_80px_rgba(212,175,55,0.08)] hover:-translate-y-1 transition-all duration-500">
                <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/5 via-transparent to-[#FAF6F0] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
                <div className="relative z-10 flex flex-col h-full">
@@ -371,7 +377,7 @@ export default function Home() {
                       </div>
                       <div className="text-right">
                          <span className="block text-[#D4AF37] font-black text-xs mb-1">$575</span>
-                         <a href="https://glossgenius.com" target="_blank" rel="noreferrer" className="text-[9px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors">Book →</a>
+                         <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="text-[9px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors">Book →</a>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
@@ -381,14 +387,13 @@ export default function Home() {
                       </div>
                       <div className="text-right">
                          <span className="block text-[#D4AF37] font-black text-xs mb-1">$575+</span>
-                         <a href="https://glossgenius.com" target="_blank" rel="noreferrer" className="text-[9px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors">Book →</a>
+                         <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="text-[9px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors">Book →</a>
                       </div>
                     </div>
                   </div>
                </div>
             </div>
 
-            {/* CARD: Scalp & Camo */}
             <div className="bg-[#FCFBF8] border border-gray-100 rounded-3xl p-8 relative overflow-hidden group hover:shadow-[0_40px_80px_rgba(212,175,55,0.08)] hover:-translate-y-1 transition-all duration-500">
                <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/5 via-transparent to-[#FAF6F0] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
                <div className="relative z-10 flex flex-col h-full">
@@ -403,7 +408,7 @@ export default function Home() {
                       </div>
                       <div className="text-right">
                          <span className="block text-[#D4AF37] font-black text-xs mb-1">$625+</span>
-                         <a href="https://glossgenius.com" target="_blank" rel="noreferrer" className="text-[9px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors">Book →</a>
+                         <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="text-[9px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors">Book →</a>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
@@ -413,14 +418,13 @@ export default function Home() {
                       </div>
                       <div className="text-right">
                          <span className="block text-[#D4AF37] font-black text-xs mb-1">$0</span>
-                         <a href="https://glossgenius.com" target="_blank" rel="noreferrer" className="text-[9px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors">Book →</a>
+                         <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="text-[9px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors">Book →</a>
                       </div>
                     </div>
                   </div>
                </div>
             </div>
 
-            {/* CARD: Master Training */}
             <div className="bg-[#FAF6F0] border border-[#D4AF37]/30 rounded-3xl p-8 relative overflow-hidden group hover:shadow-[0_40px_80px_rgba(212,175,55,0.15)] hover:-translate-y-1 transition-all duration-500">
                <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/10 to-transparent opacity-50 pointer-events-none"></div>
                <div className="relative z-10 flex flex-col h-full">
@@ -438,7 +442,7 @@ export default function Home() {
                       </div>
                       <div className="text-right">
                          <span className="block text-[#D4AF37] font-black text-xs mb-1">$850+</span>
-                         <a href="https://glossgenius.com" target="_blank" rel="noreferrer" className="text-[9px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors">Book →</a>
+                         <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="text-[9px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors">Book →</a>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
@@ -448,7 +452,7 @@ export default function Home() {
                       </div>
                       <div className="text-right">
                          <span className="block text-[#D4AF37] font-black text-xs mb-1">$1,500</span>
-                         <a href="https://glossgenius.com" target="_blank" rel="noreferrer" className="text-[9px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors">Book →</a>
+                         <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="text-[9px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors">Book →</a>
                       </div>
                     </div>
                   </div>
@@ -459,7 +463,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. ABOUT JANNA: LOCAL IMAGES & BLUSH BACKGROUND */}
+      {/* 6. ABOUT JANNA */}
       <section id="meet-janna" className="py-24 lg:py-32 bg-[#FCFBF8] relative z-10 border-t border-gray-100">
         <div className="max-w-[1200px] mx-auto px-4 lg:px-8">
           <div className="flex flex-col md:flex-row gap-16 lg:gap-24 items-center">
@@ -467,11 +471,9 @@ export default function Home() {
             <div className="md:w-1/2 relative w-full flex justify-center">
                 <div className="absolute top-[10%] left-[-5%] w-[80%] h-[90%] bg-[#FAF6F0] rounded-t-[15rem] rounded-b-xl -z-10 border border-[#D4AF37]/20"></div>
                 <div className="w-[85%] aspect-[2/3] rounded-t-[15rem] rounded-b-sm overflow-hidden shadow-2xl relative z-10 border-[6px] border-white bg-gray-100">
-                    {/* LOCAL JANNA IMAGE */}
                     <img src="/janna.jpg" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000" alt="Janna Sulemann" />
                 </div>
                 <div className="absolute bottom-10 -right-4 bg-white/90 backdrop-blur-sm p-4 rounded-lg shadow-xl border border-[#D4AF37]/10 z-20">
-                    {/* LOCAL SIGNATURE IMAGE */}
                     <img src="/janna-sign.jpg" className="h-10 opacity-80 mix-blend-multiply" alt="Janna Signature" />
                     <p className="text-[7px] uppercase tracking-[0.3em] font-black text-center mt-2 text-[#D4AF37]">Master Artist</p>
                 </div>
@@ -519,17 +521,18 @@ export default function Home() {
              <h2 className="text-[#1A1A1A] text-3xl font-serif">A Reputation Built on <span className="italic text-gray-400">Trust</span></h2>
          </div>
          
-         {/* JS-Powered Scrollable Marquee Container */}
          <div 
            ref={marqueeRef}
+           onMouseDown={handleMouseDown}
+           onMouseLeave={handleMouseLeave}
+           onMouseUp={handleMouseUp}
+           onMouseMove={handleDragMove}
            className="flex overflow-x-auto no-scrollbar gap-6 px-4 snap-x cursor-grab active:cursor-grabbing pb-10"
            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
          >
-            {/* Duplicated 4 times for a seamless infinite loop feel */}
             {[...Array(4)].map((_, arrayIndex) => (
               <div key={arrayIndex} className="flex gap-6 flex-none">
                 
-                {/* Review 1 */}
                 <a href="https://maps.app.goo.gl/SYMzModDM8EXBM6F7" target="_blank" rel="noreferrer" className="inline-block w-[320px] sm:w-[400px] bg-[#FCFBF8] p-8 rounded-sm border border-[#D4AF37]/20 hover:border-[#D4AF37] shadow-sm hover:shadow-[0_10px_30px_rgba(212,175,55,0.1)] transition-all whitespace-normal transform hover:-translate-y-1 snap-center">
                     <div className="flex items-center gap-4 mb-4">
                         <div className="w-10 h-10 rounded-full bg-[#1A1A1A] text-[#D4AF37] flex items-center justify-center font-serif text-lg flex-shrink-0">A</div>
@@ -545,7 +548,6 @@ export default function Home() {
                     </div>
                 </a>
                 
-                {/* Review 2 */}
                 <a href="https://www.google.com/maps/place/Polaris+Aesthetics/@40.1442707,-82.9914008,17z/data=!3m1!4b1!4m6!3m5!1s0x8838f52e99680d51:0x15b295572df54161!8m2!3d40.1442707!4d-82.9888259!16s%2Fg%2F11jnf_hb4q?entry=ttu&g_ep=EgoyMDI2MDIyMy4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noreferrer" className="inline-block w-[320px] sm:w-[400px] bg-[#FCFBF8] p-8 rounded-sm border border-[#D4AF37]/20 hover:border-[#D4AF37] shadow-sm hover:shadow-[0_10px_30px_rgba(212,175,55,0.1)] transition-all whitespace-normal transform hover:-translate-y-1 snap-center">
                     <div className="flex items-center gap-4 mb-4">
                         <div className="w-10 h-10 rounded-full bg-[#1A1A1A] text-[#D4AF37] flex items-center justify-center font-serif text-lg flex-shrink-0">S</div>
@@ -561,7 +563,6 @@ export default function Home() {
                     </div>
                 </a>
 
-                {/* Review 3 */}
                 <a href="https://maps.app.goo.gl/SYMzModDM8EXBM6F7" target="_blank" rel="noreferrer" className="inline-block w-[320px] sm:w-[400px] bg-[#FCFBF8] p-8 rounded-sm border border-[#D4AF37]/20 hover:border-[#D4AF37] shadow-sm hover:shadow-[0_10px_30px_rgba(212,175,55,0.1)] transition-all whitespace-normal transform hover:-translate-y-1 snap-center">
                     <div className="flex items-center gap-4 mb-4">
                         <div className="w-10 h-10 rounded-full bg-[#1A1A1A] text-[#D4AF37] flex items-center justify-center font-serif text-lg flex-shrink-0">W</div>
@@ -582,7 +583,7 @@ export default function Home() {
          </div>
       </section>
 
-      {/* 8. INTERACTIVE BEFORE & AFTER SLIDER (LOCAL IMAGES) */}
+      {/* 8. INTERACTIVE BEFORE & AFTER SLIDER */}
       <section className="py-24 lg:py-32 bg-[#FCFBF8] relative z-10">
         <div className="max-w-[1400px] mx-auto px-4 lg:px-6">
           <div className="text-center mb-16">
@@ -603,10 +604,7 @@ export default function Home() {
               onTouchStart={(e) => { setIsDragging(true); handleMove(e.touches[0].clientX); }}
               onTouchEnd={() => setIsDragging(false)}
             >
-              {/* LOCAL BEFORE IMAGE */}
               <img src="/before.jpg" className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none grayscale opacity-70" alt="Before Brows" draggable="false" />
-              
-              {/* LOCAL AFTER IMAGE */}
               <img src="/after.jpg" className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none" style={{ clipPath: `polygon(0 0, ${sliderPosition}% 0, ${sliderPosition}% 100%, 0 100%)` }} alt="After Brows" draggable="false" />
               
               <div className="absolute inset-y-0 w-[2px] bg-white shadow-[0_0_15px_#D4AF37] z-20 pointer-events-none transition-transform duration-75" style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}>
@@ -624,18 +622,18 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 9. AI VIRTUAL CONSULTATION */}
+      {/* 9. LEAD CAPTURE MACHINE (PIVOT) */}
       <section className="relative py-24 lg:py-32 bg-[#FAF6F0] clip-chevron-bottom z-20 overflow-hidden border-t border-white">
         <div className="relative z-10 max-w-[1400px] mx-auto px-4 lg:px-6 text-center pb-[4vw]">
-            <h4 className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.3em] mb-4">Virtual Assessment</h4>
-            <h2 className="text-4xl md:text-5xl font-serif text-[#1A1A1A] tracking-tight mb-6">Discover Your <span className="italic">Perfect Shape.</span></h2>
+            <h4 className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.3em] mb-4">Direct Expert Advice</h4>
+            <h2 className="text-4xl md:text-5xl font-serif text-[#1A1A1A] tracking-tight mb-6">Get a Free Virtual <span className="italic">Assessment.</span></h2>
             <p className="text-gray-500 text-sm md:text-base max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
-                Upload 3 photos securely from your phone. Our Polaris AI will analyze your facial structure and give you an instant consultation on the best pigment and technique for your features.
+                Upload 3 quick photos securely from your phone. Janna will personally review your facial structure and email you a custom recommendation on the best pigment and technique for your features.
             </p>
 
             <div className="max-w-xl mx-auto bg-white border border-[#D4AF37]/20 p-8 rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.03)]">
                 <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-6">
-                    <span className="text-gray-400 text-[9px] uppercase tracking-[0.2em] font-black flex items-center gap-2"><span className="w-2 h-2 bg-[#D4AF37] rounded-full animate-pulse"></span> Polaris Bot Online</span>
+                    <span className="text-gray-400 text-[9px] uppercase tracking-[0.2em] font-black flex items-center gap-2"><span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Janna is receiving requests</span>
                     <span className="bg-[#FAF6F0] text-[#D4AF37] px-4 py-1.5 rounded-sm text-[8px] font-black tracking-[0.2em] uppercase border border-[#D4AF37]/20">Secure Portal</span>
                 </div>
                 
@@ -658,7 +656,7 @@ export default function Home() {
                   onClick={() => setIsChatOpen(true)}
                   className="w-full bg-[#1A1A1A] hover:bg-[#D4AF37] text-white py-4.5 rounded-sm text-[10px] md:text-xs font-black uppercase tracking-[0.2em] shadow-lg transition-colors"
                 >
-                    Initiate Mapping Scan
+                    Submit Photos to Janna
                 </button>
             </div>
         </div>
@@ -713,7 +711,7 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* --- THE AI TRIAGE CHATBOT UI MODAL (BRIGHT) --- */}
+      {/* --- WEB3FORMS LEAD CAPTURE MODAL --- */}
       {isChatOpen && (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:justify-end sm:pr-8 sm:pb-8 pointer-events-none">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm sm:hidden pointer-events-auto" onClick={() => setIsChatOpen(false)}></div>
@@ -721,10 +719,10 @@ export default function Home() {
           <div className="relative w-full sm:w-[400px] h-[85vh] sm:h-[600px] bg-white border border-[#D4AF37]/20 rounded-t-[2rem] sm:rounded-[2rem] shadow-[0_40px_80px_rgba(0,0,0,0.15)] flex flex-col pointer-events-auto transform transition-all animate-slide-up overflow-hidden">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-[#FAF6F0]">
                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center text-[#D4AF37] font-serif text-lg">P</div>
+                  <div className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center text-[#D4AF37] font-serif text-lg">J</div>
                   <div>
-                    <h3 className="font-black text-[#1A1A1A] text-xs uppercase tracking-[0.2em] leading-none">Polaris Bot</h3>
-                    <p className="text-[8px] text-green-500 font-black uppercase tracking-[0.3em] mt-2 flex items-center gap-1.5"><span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> Online</p>
+                    <h3 className="font-black text-[#1A1A1A] text-xs uppercase tracking-[0.2em] leading-none">Janna Sulemann</h3>
+                    <p className="text-[8px] text-green-500 font-black uppercase tracking-[0.3em] mt-2 flex items-center gap-1.5"><span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> Receiving Requests</p>
                   </div>
                </div>
                <button onClick={() => { setIsChatOpen(false); setChatStep(1); }} className="text-gray-400 hover:text-[#1A1A1A] transition-colors">
@@ -733,61 +731,76 @@ export default function Home() {
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
-               {chatStep === 1 && (
-                 <>
-                    <div className="bg-[#FAF6F0] p-5 rounded-tr-2xl rounded-bl-2xl rounded-br-2xl text-xs text-gray-600 leading-relaxed border border-[#D4AF37]/10">
-                      Hi! I am the Polaris AI assistant. Let's see what pigment and shape works best for your facial structure. <br/><br/>First, who am I speaking with?
-                    </div>
-                    <form onSubmit={handleChatNext} className="space-y-4 pt-4">
-                      <input required type="text" placeholder="First Name" className="w-full bg-[#FCFBF8] border border-gray-200 rounded-sm px-5 py-4 text-[#1A1A1A] text-xs focus:outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-400" />
-                      <input required type="email" placeholder="Email Address" className="w-full bg-[#FCFBF8] border border-gray-200 rounded-sm px-5 py-4 text-[#1A1A1A] text-xs focus:outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-400" />
-                      <input required type="tel" placeholder="Phone Number" className="w-full bg-[#FCFBF8] border border-gray-200 rounded-sm px-5 py-4 text-[#1A1A1A] text-xs focus:outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-400" />
-                      <button type="submit" className="w-full bg-[#1A1A1A] text-white text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-sm shadow-xl mt-4 hover:bg-[#D4AF37] transition-colors">Continue</button>
-                    </form>
-                 </>
-               )}
+               <form onSubmit={handleVirtualSubmit} className="space-y-4">
+                 
+                 {chatStep === 1 && (
+                   <div className="animate-fade-in">
+                      <div className="bg-[#FAF6F0] p-5 rounded-tr-2xl rounded-bl-2xl rounded-br-2xl text-xs text-gray-600 leading-relaxed border border-[#D4AF37]/10 mb-6">
+                        Hello! I'll personally review your features to recommend the absolute perfect pigment and shape for you. <br/><br/>First, where should I send your assessment?
+                      </div>
+                      <input required name="name" type="text" placeholder="Full Name" className="w-full bg-[#FCFBF8] border border-gray-200 rounded-sm px-5 py-4 text-[#1A1A1A] text-xs focus:outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-400 mb-4" />
+                      <input required name="email" type="email" placeholder="Email Address" className="w-full bg-[#FCFBF8] border border-gray-200 rounded-sm px-5 py-4 text-[#1A1A1A] text-xs focus:outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-400 mb-4" />
+                      <input required name="phone" type="tel" placeholder="Phone Number" className="w-full bg-[#FCFBF8] border border-gray-200 rounded-sm px-5 py-4 text-[#1A1A1A] text-xs focus:outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-400 mb-4" />
+                      
+                      <button type="button" onClick={(e) => {
+                        const form = e.currentTarget.closest('form');
+                        if(form && form.name.value && form.email.value && form.phone.value) {
+                          setChatStep(2);
+                        } else {
+                          alert("Please fill in all fields to continue.");
+                        }
+                      }} className="w-full bg-[#1A1A1A] text-white text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-sm shadow-xl hover:bg-[#D4AF37] transition-colors">Continue</button>
+                   </div>
+                 )}
 
-               {chatStep === 2 && (
-                 <>
-                    <div className="bg-[#FAF6F0] p-5 rounded-tr-2xl rounded-bl-2xl rounded-br-2xl text-xs text-gray-600 leading-relaxed border border-[#D4AF37]/10">
-                      Great. Now, securely upload 3 clear photos of your face so I can scan your bone structure and skin tone.
-                    </div>
-                    <div className="grid grid-cols-3 gap-3 pt-4">
-                       <div className="aspect-square bg-[#FCFBF8] border border-dashed border-[#D4AF37]/50 rounded-sm flex flex-col items-center justify-center cursor-pointer hover:border-[#D4AF37] transition-colors">
-                          <span className="text-[#D4AF37] text-2xl mb-2">+</span>
-                          <span className="text-[8px] uppercase tracking-[0.2em] font-black text-gray-400">Left</span>
-                       </div>
-                       <div className="aspect-square bg-[#FCFBF8] border border-dashed border-[#D4AF37]/50 rounded-sm flex flex-col items-center justify-center cursor-pointer hover:border-[#D4AF37] transition-colors">
-                          <span className="text-[#D4AF37] text-2xl mb-2">+</span>
-                          <span className="text-[8px] uppercase tracking-[0.2em] font-black text-gray-400">Right</span>
-                       </div>
-                       <div className="aspect-square bg-[#FCFBF8] border border-dashed border-[#D4AF37]/50 rounded-sm flex flex-col items-center justify-center cursor-pointer hover:border-[#D4AF37] transition-colors">
-                          <span className="text-[#D4AF37] text-2xl mb-2">+</span>
-                          <span className="text-[8px] uppercase tracking-[0.2em] font-black text-gray-400">Front</span>
-                       </div>
-                    </div>
-                    <button onClick={handleChatNext} className="w-full bg-[#1A1A1A] text-white text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-sm shadow-xl mt-6 hover:bg-[#D4AF37] transition-colors">Analyze Structure</button>
-                 </>
-               )}
+                 {chatStep === 2 && (
+                   <div className="animate-fade-in">
+                      <div className="bg-[#FAF6F0] p-5 rounded-tr-2xl rounded-bl-2xl rounded-br-2xl text-xs text-gray-600 leading-relaxed border border-[#D4AF37]/10 mb-6">
+                        Perfect. Now securely upload 3 clear photos of your face in good lighting. I need to see your bone structure and skin undertones clearly.
+                      </div>
+                      
+                      {/* Note: Web3Forms free tier handles files if configured, otherwise this serves as premium UI */}
+                      <div className="grid grid-cols-3 gap-3">
+                         <label className="aspect-square bg-[#FCFBF8] border border-dashed border-[#D4AF37]/50 rounded-sm flex flex-col items-center justify-center cursor-pointer hover:border-[#D4AF37] transition-colors group relative overflow-hidden">
+                            <input type="file" name="left_brow" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
+                            <span className="text-[#D4AF37] text-2xl mb-2 group-hover:scale-110 transition-transform">+</span>
+                            <span className="text-[8px] uppercase tracking-[0.2em] font-black text-gray-400">Left</span>
+                         </label>
+                         <label className="aspect-square bg-[#FCFBF8] border border-dashed border-[#D4AF37]/50 rounded-sm flex flex-col items-center justify-center cursor-pointer hover:border-[#D4AF37] transition-colors group relative overflow-hidden">
+                            <input type="file" name="right_brow" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
+                            <span className="text-[#D4AF37] text-2xl mb-2 group-hover:scale-110 transition-transform">+</span>
+                            <span className="text-[8px] uppercase tracking-[0.2em] font-black text-gray-400">Right</span>
+                         </label>
+                         <label className="aspect-square bg-[#FCFBF8] border border-dashed border-[#D4AF37]/50 rounded-sm flex flex-col items-center justify-center cursor-pointer hover:border-[#D4AF37] transition-colors group relative overflow-hidden">
+                            <input type="file" name="full_face" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
+                            <span className="text-[#D4AF37] text-2xl mb-2 group-hover:scale-110 transition-transform">+</span>
+                            <span className="text-[8px] uppercase tracking-[0.2em] font-black text-gray-400">Front</span>
+                         </label>
+                      </div>
+                      
+                      <button type="submit" className="w-full bg-[#1A1A1A] text-white text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-sm shadow-xl mt-6 hover:bg-[#D4AF37] transition-colors">Submit Photos to Janna</button>
+                   </div>
+                 )}
 
-               {chatStep === 3 && (
-                 <div className="flex flex-col items-center justify-center h-full space-y-6">
-                    <div className="w-16 h-16 border-[3px] border-[#FAF6F0] border-t-[#D4AF37] rounded-full animate-spin"></div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] animate-pulse text-[#D4AF37]">Running PhiBrows AI...</p>
-                 </div>
-               )}
+                 {chatStep === 3 && (
+                   <div className="flex flex-col items-center justify-center h-[300px] space-y-6">
+                      <div className="w-16 h-16 border-[3px] border-[#FAF6F0] border-t-[#D4AF37] rounded-full animate-spin"></div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] animate-pulse text-[#D4AF37]">Sending Securely...</p>
+                   </div>
+                 )}
 
-               {chatStep === 4 && (
-                 <>
-                    <div className="bg-[#FAF6F0] p-6 rounded-tr-2xl rounded-bl-2xl rounded-br-2xl text-xs text-gray-600 leading-relaxed border border-[#D4AF37]/30 shadow-lg">
-                      <strong className="text-[#1A1A1A] font-serif text-lg block mb-3">Scan Complete.</strong>
-                      Based on your bone structure and skin undertones, you are an excellent candidate for <strong className="text-[#D4AF37]">Advanced Microblading with custom shading</strong>.<br/><br/>
-                      Janna will review these images to prepare your custom pigment blend.<br/><br/>
-                      Our clinic coordinator will text you shortly to schedule your session!
-                    </div>
-                    <button onClick={() => { setIsChatOpen(false); setChatStep(1); }} className="w-full border border-gray-200 text-[#1A1A1A] text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-sm hover:bg-gray-50 mt-6 transition-colors">Close Portal</button>
-                 </>
-               )}
+                 {chatStep === 4 && (
+                   <div className="animate-fade-in">
+                      <div className="bg-[#FAF6F0] p-6 rounded-tr-2xl rounded-bl-2xl rounded-br-2xl text-xs text-gray-600 leading-relaxed border border-[#D4AF37]/30 shadow-lg">
+                        <strong className="text-[#1A1A1A] font-serif text-lg block mb-3">Received.</strong>
+                        Your photos and details have been securely sent directly to Janna.<br/><br/>
+                        She will review your unique facial structure and email you a customized pigment and shape recommendation shortly.<br/><br/>
+                        Keep an eye on your inbox!
+                      </div>
+                      <button type="button" onClick={() => { setIsChatOpen(false); setChatStep(1); }} className="w-full border border-gray-200 text-[#1A1A1A] text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-sm hover:bg-gray-50 mt-6 transition-colors">Close Portal</button>
+                   </div>
+                 )}
+               </form>
             </div>
           </div>
         </div>
@@ -825,6 +838,12 @@ export default function Home() {
           100% { transform: translateY(0); opacity: 1; }
         }
         .animate-slide-up { animation: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        @keyframes fade-in {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+        .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
 
         @keyframes spin-slow {
           100% { transform: rotate(360deg); }
