@@ -80,47 +80,27 @@ export default function Home() {
     marqueeRef.current.scrollLeft = scrollLeft - walk;
   };
 
-  // --- WEB3FORMS LEAD CAPTURE LOGIC ---
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chatStep, setChatStep] = useState(1);
-  const [isVideoOpen, setIsVideoOpen] = useState(false); 
-  
-  const handleVirtualSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setChatStep(3); // Loading State
-    
-    const formData = new FormData(e.currentTarget);
-    formData.append("access_key", "de75332f-f09b-4b62-afc0-e22d429112fb");
-    formData.append("subject", "New Virtual Assessment Lead - Polaris");
-
-    try {
-      const response = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        body: formData
-      });
-      if (response.ok) {
-        setChatStep(4);
-      } else {
-        setChatStep(4); // Fallback to success UI
-      }
-    } catch (error) {
-      setChatStep(4);
-    }
-  };
-
   const reviewsData = [
     { initial: "A", name: "Anna", link: "https://maps.app.goo.gl/SYMzModDM8EXBM6F7", text: "Amazing experience! Janna was so professional, thorough, knowledgeable, personable and TALENTED! Absolutely love my brows!!" },
     { initial: "S", name: "Susana Cuero", link: "https://www.google.com/maps/place/Polaris+Aesthetics/@40.1442707,-82.9914008,17z/data=!3m1!4b1!4m6!3m5!1s0x8838f52e99680d51:0x15b295572df54161!8m2!3d40.1442707!4d-82.9888259!16s%2Fg%2F11jnf_hb4q?entry=ttu&g_ep=EgoyMDI2MDIyMy4wIKXMDSoASAFQAw%3D%3D", text: "The service is excellent!!! You get what you expect!!! 😍😍😍 plus you feel like if you were in a SPA 🧘‍♀️." },
     { initial: "W", name: "Wendy", link: "https://maps.app.goo.gl/SYMzModDM8EXBM6F7", text: "Janna was very professional and made me feel very comfortable... She was very thorough in explaining the process and aftercare." }
   ];
 
-// --- INLINE VIRTUAL ASSESSMENT LOGIC ---
+  // --- INLINE VIRTUAL ASSESSMENT LOGIC ---
   const [assessmentStatus, setAssessmentStatus] = useState("idle");
-const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatStep, setChatStep] = useState(1);
+  const [isVideoOpen, setIsVideoOpen] = useState(false); 
   
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert("File is too large. Please select an image under 5MB.");
+        e.target.value = ""; 
+        return;
+      }
       setPreviewUrl(URL.createObjectURL(file));
     } else {
       setPreviewUrl(null);
@@ -130,23 +110,27 @@ const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const handleAssessmentSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setAssessmentStatus("loading");
+    setChatStep(3); // Loading State
     
     const formData = new FormData(e.currentTarget);
     formData.append("access_key", "de75332f-f09b-4b62-afc0-e22d429112fb");
-    formData.append("subject", "New Virtual Assessment & Photos - Polaris");
+    formData.append("subject", "🚨 New Virtual Assessment & Photo - Polaris");
 
     try {
       const response = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        body: formData // FormData automatically handles the multipart/form-data for the images!
+        body: formData // FormData automatically handles the multipart/form-data for the image
       });
       if (response.ok) {
         setAssessmentStatus("success");
+        setChatStep(4);
       } else {
         setAssessmentStatus("error");
+        setChatStep(4);
       }
     } catch (error) {
       setAssessmentStatus("error");
+      setChatStep(4);
     }
   };
 
@@ -266,10 +250,9 @@ const [previewUrl, setPreviewUrl] = useState<string | null>(null);
               <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="bg-[#D4AF37] hover:bg-[#1A1A1A] text-white px-8 lg:px-10 py-4 lg:py-4.5 rounded-sm text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] shadow-[0_20px_40px_rgba(212,175,55,0.3)] transition-all duration-500 transform hover:-translate-y-1 text-center">
                 Reserve Your Appt
               </a>
-              <button onClick={() => setIsVideoOpen(true)} className="bg-transparent border border-[#1A1A1A]/20 hover:border-[#D4AF37] hover:bg-white text-[#1A1A1A] px-8 lg:px-10 py-4 lg:py-4.5 rounded-sm text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] transition-all duration-500 flex items-center justify-center gap-3 group">
-                <span className="w-5 h-5 lg:w-6 lg:h-6 rounded-full border border-[#1A1A1A] group-hover:border-[#D4AF37] flex items-center justify-center pl-0.5 text-[8px]">▶</span> 
-                Play Film
-              </button>
+              <a href="/portfolio" className="bg-transparent border border-[#1A1A1A]/20 hover:border-[#D4AF37] hover:bg-white text-[#1A1A1A] px-8 lg:px-10 py-4 lg:py-4.5 rounded-sm text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] transition-all duration-500 flex items-center justify-center gap-3 group">
+                Discover The Artistry <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </a>
             </div>
           </div>
 
@@ -365,7 +348,7 @@ const [previewUrl, setPreviewUrl] = useState<string | null>(null);
              </h4>
              <h2 className="text-4xl md:text-6xl font-serif text-[#1A1A1A] tracking-tight mb-8">Signature <span className="italic text-[#D4AF37]">Treatments.</span></h2>
              <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="inline-flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors group bg-[#FAF6F0] px-8 py-4 rounded-full border border-[#D4AF37]/20 shadow-sm hover:shadow-[0_10px_20px_rgba(212,175,55,0.1)]">
-               View Full Booking Menu <span className="group-hover:translate-x-1 transition-transform">→</span>
+                View Full Booking Menu <span className="group-hover:translate-x-1 transition-transform">→</span>
              </a>
           </div>
 
@@ -375,27 +358,27 @@ const [previewUrl, setPreviewUrl] = useState<string | null>(null);
                <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/5 via-transparent to-[#FAF6F0] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
                <div className="relative z-10 flex flex-col h-full justify-between">
                   <div className="mb-10">
-                     <span className="text-[#D4AF37] text-[10px] font-black tracking-widest mb-4 block">[ 01 ]</span>
-                     <h3 className="font-serif text-4xl text-[#1A1A1A] mb-4">The Eyebrow <span className="italic">Suite</span></h3>
-                     <p className="text-sm text-gray-500 leading-relaxed max-w-md">Flawless, undetectable microblading mimicking real hair. Master-level custom shading included to perfect the blend.</p>
+                      <span className="text-[#D4AF37] text-[10px] font-black tracking-widest mb-4 block">[ 01 ]</span>
+                      <h3 className="font-serif text-4xl text-[#1A1A1A] mb-4">The Eyebrow <span className="italic">Suite</span></h3>
+                      <p className="text-sm text-gray-500 leading-relaxed max-w-md">Flawless, undetectable microblading mimicking real hair. Master-level custom shading included to perfect the blend.</p>
                   </div>
                   <div className="grid sm:grid-cols-2 gap-8 border-t border-[#D4AF37]/10 pt-8">
-                     <div>
-                       <div className="flex justify-between items-end mb-2">
-                         <h4 className="text-base font-bold text-[#1A1A1A]">Microblading</h4>
-                         <span className="text-[#D4AF37] font-black text-xs">$575</span>
-                       </div>
-                       <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-4">120 Min</p>
-                       <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="text-[10px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors border-b border-black hover:border-[#D4AF37] pb-1">Select Treatment</a>
-                     </div>
-                     <div>
-                       <div className="flex justify-between items-end mb-2">
-                         <h4 className="text-base font-bold text-[#1A1A1A]">6-12+ Month Refresh</h4>
-                         <span className="text-[#D4AF37] font-black text-xs">$175+</span>
-                       </div>
-                       <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-4">90 Min</p>
-                       <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="text-[10px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors border-b border-black hover:border-[#D4AF37] pb-1">Select Treatment</a>
-                     </div>
+                      <div>
+                        <div className="flex justify-between items-end mb-2">
+                          <h4 className="text-base font-bold text-[#1A1A1A]">Microblading</h4>
+                          <span className="text-[#D4AF37] font-black text-xs">$575</span>
+                        </div>
+                        <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-4">120 Min</p>
+                        <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="text-[10px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors border-b border-black hover:border-[#D4AF37] pb-1">Select Treatment</a>
+                      </div>
+                      <div>
+                        <div className="flex justify-between items-end mb-2">
+                          <h4 className="text-base font-bold text-[#1A1A1A]">6-12+ Month Refresh</h4>
+                          <span className="text-[#D4AF37] font-black text-xs">$175+</span>
+                        </div>
+                        <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-4">90 Min</p>
+                        <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="text-[10px] uppercase tracking-widest font-black text-[#1A1A1A] hover:text-[#D4AF37] transition-colors border-b border-black hover:border-[#D4AF37] pb-1">Select Treatment</a>
+                      </div>
                   </div>
                </div>
             </div>
@@ -675,9 +658,7 @@ const [previewUrl, setPreviewUrl] = useState<string | null>(null);
         </div>
       </section>
 
-
-
-{/* 9. LEAD CAPTURE MACHINE (ULTRA-LUXURY) */}
+      {/* 9. LEAD CAPTURE MACHINE (ULTRA-LUXURY) */}
       <section className="relative py-24 lg:py-36 bg-[#FCFBF8] clip-chevron-bottom z-20 overflow-hidden border-t border-[#D4AF37]/10">
         
         {/* Subtle Ambient Background Light */}
@@ -705,30 +686,37 @@ const [previewUrl, setPreviewUrl] = useState<string | null>(null);
                 </div>
                 
                 {assessmentStatus === "success" ? (
-                   <div className="text-center py-20 animate-fade-in relative z-10">
-                      <div className="w-20 h-20 bg-white shadow-[0_20px_40px_rgba(212,175,55,0.2)] rounded-full flex items-center justify-center mx-auto mb-6">
-                         <span className="text-3xl text-[#D4AF37]">✓</span>
+                   <div className="text-center py-20 relative z-10 animate-fade-in flex flex-col items-center justify-center">
+                      <div className="relative w-24 h-24 mb-8 flex items-center justify-center">
+                         <div className="absolute inset-0 bg-[#D4AF37]/20 rounded-full animate-[ping_3s_ease-in-out_infinite]"></div>
+                         <div className="absolute inset-2 bg-[#D4AF37]/40 rounded-full animate-pulse"></div>
+                         <div className="relative w-16 h-16 bg-white shadow-[0_20px_40px_rgba(212,175,55,0.4)] rounded-full flex items-center justify-center animate-[bounce_2s_infinite]">
+                           <svg className="w-8 h-8 text-[#D4AF37] animate-[pulse_2s_infinite]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+                           </svg>
+                         </div>
                       </div>
-                      <h3 className="font-serif text-3xl mb-3 text-[#1A1A1A]">Securely Delivered.</h3>
-                      <p className="text-gray-500 text-sm max-w-sm mx-auto">Your details and photo have been encrypted and sent directly to Janna. She will reach out shortly.</p>
+                      <h3 className="font-serif text-3xl mb-3 text-[#1A1A1A] animate-slide-up">Securely Delivered.</h3>
+                      <p className="text-gray-500 text-sm max-w-sm mx-auto leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>Your details and photo have been encrypted and sent directly to Janna. She will reach out to your email shortly.</p>
                    </div>
                 ) : (
-                  <form onSubmit={handleVirtualSubmit} encType="multipart/form-data" className="relative z-10 flex flex-col md:flex-row gap-10 lg:gap-16">
+                  <form onSubmit={handleAssessmentSubmit} encType="multipart/form-data" className="relative z-10 flex flex-col md:flex-row gap-10 lg:gap-16">
                       
                       {/* Left: Cinematic Single Image Upload */}
                       <div className="w-full md:w-5/12 shrink-0">
-                        <label className="relative flex flex-col items-center justify-center w-full aspect-[4/5] bg-[#FCFBF8] border-[1.5px] border-dashed border-[#D4AF37]/40 rounded-2xl cursor-pointer hover:border-[#D4AF37] transition-all duration-500 overflow-hidden group/upload shadow-inner">
-                            <input required type="file" name="client_photo" className="hidden" accept="image/*" onChange={handleImageChange} />
+                        <label className="relative flex flex-col items-center justify-center w-full aspect-[4/5] bg-[#FCFBF8] border-[1.5px] border-dashed border-[#D4AF37]/40 rounded-2xl hover:border-[#D4AF37] transition-all duration-500 overflow-hidden group/upload shadow-inner">
+                            {/* The absolute inset-0 input hack allows validation to pass perfectly without 'hidden' crashing the browser */}
+                            <input required type="file" name="attachment" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" accept="image/png, image/jpeg, image/jpg, image/webp" onChange={handleImageChange} />
                             
                             {previewUrl ? (
                               <>
                                 <img src={previewUrl} alt="Upload Preview" className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover/upload:scale-105" />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/upload:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/upload:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm z-10 pointer-events-none">
                                   <span className="text-white text-[9px] uppercase tracking-[0.3em] font-black border border-white/50 px-5 py-2.5 rounded-full backdrop-blur-md">Replace Photo</span>
                                 </div>
                               </>
                             ) : (
-                              <div className="flex flex-col items-center justify-center p-6 text-center transform transition-transform duration-500 group-hover/upload:-translate-y-2">
+                              <div className="flex flex-col items-center justify-center p-6 text-center transform transition-transform duration-500 group-hover/upload:-translate-y-2 pointer-events-none z-10">
                                 <div className="w-16 h-16 rounded-full bg-white shadow-[0_10px_30px_rgba(212,175,55,0.15)] flex items-center justify-center mb-5 text-[#D4AF37] group-hover/upload:scale-110 transition-transform duration-500">
                                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v16m8-8H4"></path></svg>
                                 </div>
@@ -770,7 +758,15 @@ const [previewUrl, setPreviewUrl] = useState<string | null>(null);
                           disabled={assessmentStatus === "loading"}
                           className="w-full bg-[#1A1A1A] hover:bg-[#D4AF37] text-white py-5 rounded-sm text-[10px] md:text-xs font-black uppercase tracking-[0.3em] shadow-[0_20px_40px_rgba(0,0,0,0.15)] hover:shadow-[0_20px_40px_rgba(212,175,55,0.3)] transition-all duration-500 disabled:opacity-50 mt-10 flex justify-center items-center gap-3"
                         >
-                            {assessmentStatus === "loading" ? "Encrypting & Sending..." : "Submit to Janna"}
+                            {assessmentStatus === "loading" ? (
+                              <span className="flex items-center gap-3">
+                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Encrypting & Sending...
+                              </span>
+                            ) : "Submit to Janna"}
                             {assessmentStatus !== "loading" && <span className="text-[14px]">→</span>}
                         </button>
                         {assessmentStatus === "error" && <p className="text-red-500 text-[10px] uppercase tracking-widest text-center mt-3 font-bold">Connection error. Please try again.</p>}
@@ -780,9 +776,6 @@ const [previewUrl, setPreviewUrl] = useState<string | null>(null);
             </div>
         </div>
       </section>
-
-
-
 
       {/* 10. THE FOOTER (WITH POLICY LINKS) */}
       <footer className="bg-white py-20 lg:py-24 border-t border-gray-100 -mt-[4vw] relative z-10 pt-[8vw]">
@@ -831,131 +824,12 @@ const [previewUrl, setPreviewUrl] = useState<string | null>(null);
              <p>Designed by <a href="https://vireva.agency" target="_blank" rel="noreferrer" className="text-[#1A1A1A] hover:text-[#D4AF37] transition-colors">Vireva Agency</a></p>
           </div>
         </div>
-      </footer>
-
-      {/* --- WEB3FORMS LEAD CAPTURE MODAL --- */}
-      {isChatOpen && (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:justify-end sm:pr-8 sm:pb-8 pointer-events-none">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm sm:hidden pointer-events-auto" onClick={() => setIsChatOpen(false)}></div>
-
-          <div className="relative w-full sm:w-[400px] h-[85vh] sm:h-[600px] bg-white border border-[#D4AF37]/20 rounded-t-[2rem] sm:rounded-[2rem] shadow-[0_40px_80px_rgba(0,0,0,0.15)] flex flex-col pointer-events-auto transform transition-all animate-slide-up overflow-hidden">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-[#FAF6F0]">
-               <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center text-[#D4AF37] font-serif text-lg">J</div>
-                  <div>
-                    <h3 className="font-black text-[#1A1A1A] text-xs uppercase tracking-[0.2em] leading-none">Janna Sulemann</h3>
-                    <p className="text-[8px] text-green-500 font-black uppercase tracking-[0.3em] mt-2 flex items-center gap-1.5"><span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> Receiving Requests</p>
-                  </div>
-               </div>
-               <button onClick={() => { setIsChatOpen(false); setChatStep(1); }} className="text-gray-400 hover:text-[#1A1A1A] transition-colors">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6 18L18 6M6 6l12 12"></path></svg>
-               </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
-               <form onSubmit={handleVirtualSubmit} className="space-y-4">
-                 
-                 {chatStep === 1 && (
-                   <div className="animate-fade-in">
-                      <div className="bg-[#FAF6F0] p-5 rounded-tr-2xl rounded-bl-2xl rounded-br-2xl text-xs text-gray-600 leading-relaxed border border-[#D4AF37]/10 mb-6">
-                        Hello! I'll personally review your features to recommend the absolute perfect pigment and shape for you. <br/><br/>First, where should I send your assessment?
-                      </div>
-                      <input required name="name" type="text" placeholder="Full Name" className="w-full bg-[#FCFBF8] border border-gray-200 rounded-sm px-5 py-4 text-[#1A1A1A] text-xs focus:outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-400 mb-4" />
-                      <input required name="email" type="email" placeholder="Email Address" className="w-full bg-[#FCFBF8] border border-gray-200 rounded-sm px-5 py-4 text-[#1A1A1A] text-xs focus:outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-400 mb-4" />
-                      <input required name="phone" type="tel" placeholder="Phone Number" className="w-full bg-[#FCFBF8] border border-gray-200 rounded-sm px-5 py-4 text-[#1A1A1A] text-xs focus:outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-400 mb-4" />
-                      
-                      <button type="button" onClick={(e) => {
-                        const form = e.currentTarget.closest('form');
-                        if (form && form.checkValidity()) {
-                          setChatStep(2);
-                        } else {
-                          form?.reportValidity();
-                        }
-                      }} className="w-full bg-[#1A1A1A] text-white text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-sm shadow-xl hover:bg-[#D4AF37] transition-colors">Continue</button>
-                   </div>
-                 )}
-
-                 {chatStep === 2 && (
-                   <div className="animate-fade-in">
-                      <div className="bg-[#FAF6F0] p-5 rounded-tr-2xl rounded-bl-2xl rounded-br-2xl text-xs text-gray-600 leading-relaxed border border-[#D4AF37]/10 mb-6">
-                        Perfect. Now securely upload 3 clear photos of your face in good lighting. I need to see your bone structure and skin undertones clearly.
-                      </div>
-                      
-                      <div className="grid grid-cols-3 gap-3">
-                         <label className="aspect-square bg-[#FCFBF8] border border-dashed border-[#D4AF37]/50 rounded-sm flex flex-col items-center justify-center cursor-pointer hover:border-[#D4AF37] transition-colors group relative overflow-hidden">
-                            <input type="file" name="left_brow" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
-                            <span className="text-[#D4AF37] text-2xl mb-2 group-hover:scale-110 transition-transform">+</span>
-                            <span className="text-[8px] uppercase tracking-[0.2em] font-black text-gray-400">Left</span>
-                         </label>
-                         <label className="aspect-square bg-[#FCFBF8] border border-dashed border-[#D4AF37]/50 rounded-sm flex flex-col items-center justify-center cursor-pointer hover:border-[#D4AF37] transition-colors group relative overflow-hidden">
-                            <input type="file" name="right_brow" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
-                            <span className="text-[#D4AF37] text-2xl mb-2 group-hover:scale-110 transition-transform">+</span>
-                            <span className="text-[8px] uppercase tracking-[0.2em] font-black text-gray-400">Right</span>
-                         </label>
-                         <label className="aspect-square bg-[#FCFBF8] border border-dashed border-[#D4AF37]/50 rounded-sm flex flex-col items-center justify-center cursor-pointer hover:border-[#D4AF37] transition-colors group relative overflow-hidden">
-                            <input type="file" name="full_face" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
-                            <span className="text-[#D4AF37] text-2xl mb-2 group-hover:scale-110 transition-transform">+</span>
-                            <span className="text-[8px] uppercase tracking-[0.2em] font-black text-gray-400">Front</span>
-                         </label>
-                      </div>
-                      
-                      <button type="submit" className="w-full bg-[#1A1A1A] text-white text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-sm shadow-xl mt-6 hover:bg-[#D4AF37] transition-colors">Submit Photos to Janna</button>
-                   </div>
-                 )}
-
-                 {chatStep === 3 && (
-                   <div className="flex flex-col items-center justify-center h-[300px] space-y-6">
-                      <div className="w-16 h-16 border-[3px] border-[#FAF6F0] border-t-[#D4AF37] rounded-full animate-spin"></div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.3em] animate-pulse text-[#D4AF37]">Sending Securely...</p>
-                   </div>
-                 )}
-
-                 {chatStep === 4 && (
-                   <div className="animate-fade-in">
-                      <div className="bg-[#FAF6F0] p-6 rounded-tr-2xl rounded-bl-2xl rounded-br-2xl text-xs text-gray-600 leading-relaxed border border-[#D4AF37]/30 shadow-lg">
-                        <strong className="text-[#1A1A1A] font-serif text-lg block mb-3">Received.</strong>
-                        Your photos and details have been securely sent directly to Janna.<br/><br/>
-                        She will review your unique facial structure and email you a customized pigment and shape recommendation shortly.<br/><br/>
-                        Keep an eye on your inbox!
-                      </div>
-                      <button type="button" onClick={() => { setIsChatOpen(false); setChatStep(1); }} className="w-full border border-gray-200 text-[#1A1A1A] text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-sm hover:bg-gray-50 mt-6 transition-colors">Close Portal</button>
-                   </div>
-                 )}
-               </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* --- YOUTUBE VIDEO MODAL --- */}
-      {isVideoOpen && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 md:p-8">
-          <div className="absolute inset-0 bg-white/95 backdrop-blur-xl cursor-pointer transition-opacity" onClick={() => setIsVideoOpen(false)}></div>
-          
-          <div className="relative z-10 w-full max-w-5xl aspect-video bg-black rounded-sm overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.15)] animate-slide-up border border-[#D4AF37]/20">
-            <button 
-              onClick={() => setIsVideoOpen(false)}
-              className="absolute top-6 right-6 z-20 w-12 h-12 bg-white/10 hover:bg-[#D4AF37] text-white rounded-full flex items-center justify-center transition-colors backdrop-blur-md border border-white/20 group"
-            >
-              <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            
-            <iframe 
-              className="w-full h-full"
-              src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" 
-              title="Polaris Film" 
-              frameBorder="0" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-              allowFullScreen
-            ></iframe>
-          </div>
-        </div>
-      )}      
+      </footer>     
       
       {/* GLOBAL STYLES FOR ANIMATIONS AND CLIP-PATHS */}
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes slide-up {
-          0% { transform: translateY(100%); opacity: 0; }
+          0% { transform: translateY(20px); opacity: 0; }
           100% { transform: translateY(0); opacity: 1; }
         }
         .animate-slide-up { animation: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
