@@ -114,6 +114,32 @@ export default function Home() {
     { initial: "W", name: "Wendy", link: "https://maps.app.goo.gl/SYMzModDM8EXBM6F7", text: "Janna was very professional and made me feel very comfortable... She was very thorough in explaining the process and aftercare." }
   ];
 
+// --- INLINE VIRTUAL ASSESSMENT LOGIC ---
+  const [assessmentStatus, setAssessmentStatus] = useState("idle");
+
+  const handleAssessmentSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setAssessmentStatus("loading");
+    
+    const formData = new FormData(e.currentTarget);
+    formData.append("access_key", "de75332f-f09b-4b62-afc0-e22d429112fb");
+    formData.append("subject", "New Virtual Assessment & Photos - Polaris");
+
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: formData // FormData automatically handles the multipart/form-data for the images!
+      });
+      if (response.ok) {
+        setAssessmentStatus("success");
+      } else {
+        setAssessmentStatus("error");
+      }
+    } catch (error) {
+      setAssessmentStatus("error");
+    }
+  };
+
   return (
     <div className="bg-[#FCFBF8] text-[#1A1A1A] font-sans antialiased selection:bg-[#D4AF37] selection:text-white overflow-x-hidden">
       
@@ -639,7 +665,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 9. LEAD CAPTURE MACHINE (PIVOT) */}
+{/* 9. LEAD CAPTURE MACHINE (PIVOT) */}
       <section className="relative py-24 lg:py-32 bg-[#FAF6F0] clip-chevron-bottom z-20 overflow-hidden border-t border-white">
         <div className="relative z-10 max-w-[1400px] mx-auto px-4 lg:px-6 text-center pb-[4vw]">
             <h4 className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.3em] mb-4">Direct Expert Advice</h4>
@@ -648,36 +674,69 @@ export default function Home() {
                 Upload 3 quick photos securely from your phone. Janna will personally review your facial structure and email you a custom recommendation on the best pigment and technique for your features.
             </p>
 
-            <div className="max-w-xl mx-auto bg-white border border-[#D4AF37]/20 p-8 rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.03)]">
+            <div className="max-w-xl mx-auto bg-white border border-[#D4AF37]/20 p-8 rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.03)] text-left">
                 <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-6">
                     <span className="text-gray-400 text-[9px] uppercase tracking-[0.2em] font-black flex items-center gap-2"><span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Janna is receiving requests</span>
                     <span className="bg-[#FAF6F0] text-[#D4AF37] px-4 py-1.5 rounded-sm text-[8px] font-black tracking-[0.2em] uppercase border border-[#D4AF37]/20">Secure Portal</span>
                 </div>
                 
-                <div className="grid grid-cols-3 gap-4 mb-8">
-                    <div className="aspect-square bg-[#FCFBF8] border border-dashed border-[#D4AF37]/40 hover:border-[#D4AF37] rounded-sm flex flex-col items-center justify-center cursor-pointer transition-colors group">
-                        <span className="text-2xl text-[#D4AF37] mb-2 group-hover:scale-110 transition-transform">+</span>
-                        <span className="text-[8px] text-gray-500 uppercase tracking-[0.2em] font-black">Left Brow</span>
-                    </div>
-                    <div className="aspect-square bg-[#FCFBF8] border border-dashed border-[#D4AF37]/40 hover:border-[#D4AF37] rounded-sm flex flex-col items-center justify-center cursor-pointer transition-colors group">
-                        <span className="text-2xl text-[#D4AF37] mb-2 group-hover:scale-110 transition-transform">+</span>
-                        <span className="text-[8px] text-gray-500 uppercase tracking-[0.2em] font-black">Right Brow</span>
-                    </div>
-                    <div className="aspect-square bg-[#FCFBF8] border border-dashed border-[#D4AF37]/40 hover:border-[#D4AF37] rounded-sm flex flex-col items-center justify-center cursor-pointer transition-colors group">
-                        <span className="text-2xl text-[#D4AF37] mb-2 group-hover:scale-110 transition-transform">+</span>
-                        <span className="text-[8px] text-gray-500 uppercase tracking-[0.2em] font-black">Full Face</span>
-                    </div>
-                </div>
+                {assessmentStatus === "success" ? (
+                   <div className="text-center py-12 animate-fade-in">
+                      <div className="w-16 h-16 bg-[#FCFBF8] border border-[#D4AF37]/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                         <span className="text-2xl text-[#D4AF37]">✓</span>
+                      </div>
+                      <h3 className="font-serif text-xl mb-2 text-[#1A1A1A]">Photos Received successfully!</h3>
+                      <p className="text-gray-500 text-sm">Janna is reviewing your facial structure and will email you shortly.</p>
+                   </div>
+                ) : (
+                  <form onSubmit={handleAssessmentSubmit} encType="multipart/form-data" className="space-y-6">
+                      
+                      {/* Contact Fields */}
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <input required name="first_name" type="text" placeholder="First Name" className="w-full bg-[#FCFBF8] border border-gray-200 rounded-sm px-4 py-3 text-[#1A1A1A] text-xs focus:outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-400" />
+                          <input required name="last_name" type="text" placeholder="Last Name" className="w-full bg-[#FCFBF8] border border-gray-200 rounded-sm px-4 py-3 text-[#1A1A1A] text-xs focus:outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-400" />
+                        </div>
+                        <input required name="email" type="email" placeholder="Email Address" className="w-full bg-[#FCFBF8] border border-gray-200 rounded-sm px-4 py-3 text-[#1A1A1A] text-xs focus:outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-400" />
+                        <input required name="phone" type="tel" placeholder="Phone Number" className="w-full bg-[#FCFBF8] border border-gray-200 rounded-sm px-4 py-3 text-[#1A1A1A] text-xs focus:outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-400" />
+                      </div>
 
-                <button 
-                  onClick={() => setIsChatOpen(true)}
-                  className="w-full bg-[#1A1A1A] hover:bg-[#D4AF37] text-white py-4.5 rounded-sm text-[10px] md:text-xs font-black uppercase tracking-[0.2em] shadow-lg transition-colors"
-                >
-                    Submit Photos to Janna
-                </button>
+                      {/* File Uploads wrapped in labels */}
+                      <div>
+                        <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-3">Upload 3 Clear Photos</p>
+                        <div className="grid grid-cols-3 gap-3">
+                            <label className="aspect-square bg-[#FCFBF8] border border-dashed border-[#D4AF37]/40 hover:border-[#D4AF37] rounded-sm flex flex-col items-center justify-center cursor-pointer transition-colors group relative overflow-hidden">
+                                <input required type="file" name="left_brow" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
+                                <span className="text-2xl text-[#D4AF37] mb-2 group-hover:scale-110 transition-transform">+</span>
+                                <span className="text-[8px] text-gray-500 uppercase tracking-[0.2em] font-black">Left Brow</span>
+                            </label>
+                            <label className="aspect-square bg-[#FCFBF8] border border-dashed border-[#D4AF37]/40 hover:border-[#D4AF37] rounded-sm flex flex-col items-center justify-center cursor-pointer transition-colors group relative overflow-hidden">
+                                <input required type="file" name="right_brow" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
+                                <span className="text-2xl text-[#D4AF37] mb-2 group-hover:scale-110 transition-transform">+</span>
+                                <span className="text-[8px] text-gray-500 uppercase tracking-[0.2em] font-black">Right Brow</span>
+                            </label>
+                            <label className="aspect-square bg-[#FCFBF8] border border-dashed border-[#D4AF37]/40 hover:border-[#D4AF37] rounded-sm flex flex-col items-center justify-center cursor-pointer transition-colors group relative overflow-hidden">
+                                <input required type="file" name="full_face" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
+                                <span className="text-2xl text-[#D4AF37] mb-2 group-hover:scale-110 transition-transform">+</span>
+                                <span className="text-[8px] text-gray-500 uppercase tracking-[0.2em] font-black">Full Face</span>
+                            </label>
+                        </div>
+                      </div>
+
+                      <button 
+                        type="submit"
+                        disabled={assessmentStatus === "loading"}
+                        className="w-full bg-[#1A1A1A] hover:bg-[#D4AF37] text-white py-4.5 rounded-sm text-[10px] md:text-xs font-black uppercase tracking-[0.2em] shadow-lg transition-colors disabled:opacity-50"
+                      >
+                          {assessmentStatus === "loading" ? "Uploading & Sending..." : "Submit Photos to Janna"}
+                      </button>
+                      {assessmentStatus === "error" && <p className="text-red-500 text-[10px] text-center mt-2 font-bold">Something went wrong. Please try again.</p>}
+                  </form>
+                )}
             </div>
         </div>
       </section>
+
 
       {/* 10. THE FOOTER (WITH POLICY LINKS) */}
       <footer className="bg-white py-20 lg:py-24 border-t border-gray-100 -mt-[4vw] relative z-10 pt-[8vw]">
