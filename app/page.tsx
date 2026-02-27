@@ -116,6 +116,16 @@ export default function Home() {
 
 // --- INLINE VIRTUAL ASSESSMENT LOGIC ---
   const [assessmentStatus, setAssessmentStatus] = useState("idle");
+const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setPreviewUrl(null);
+    }
+  };
 
   const handleAssessmentSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -665,77 +675,113 @@ export default function Home() {
         </div>
       </section>
 
-{/* 9. LEAD CAPTURE MACHINE (PIVOT) */}
-      <section className="relative py-24 lg:py-32 bg-[#FAF6F0] clip-chevron-bottom z-20 overflow-hidden border-t border-white">
+
+
+{/* 9. LEAD CAPTURE MACHINE (ULTRA-LUXURY) */}
+      <section className="relative py-24 lg:py-36 bg-[#FCFBF8] clip-chevron-bottom z-20 overflow-hidden border-t border-[#D4AF37]/10">
+        
+        {/* Subtle Ambient Background Light */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-[#D4AF37]/10 to-transparent rounded-full blur-[120px] pointer-events-none z-0"></div>
+
         <div className="relative z-10 max-w-[1400px] mx-auto px-4 lg:px-6 text-center pb-[4vw]">
             <h4 className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.3em] mb-4">Direct Expert Advice</h4>
-            <h2 className="text-4xl md:text-5xl font-serif text-[#1A1A1A] tracking-tight mb-6">Get a Free Virtual <span className="italic">Assessment.</span></h2>
-            <p className="text-gray-500 text-sm md:text-base max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
-                Upload 3 quick photos securely from your phone. Janna will personally review your facial structure and email you a custom recommendation on the best pigment and technique for your features.
+            <h2 className="text-4xl md:text-5xl font-serif text-[#1A1A1A] tracking-tight mb-6">Get a Free Virtual <span className="italic text-[#D4AF37]">Assessment.</span></h2>
+            <p className="text-gray-500 text-sm md:text-base max-w-2xl mx-auto mb-16 leading-relaxed font-medium">
+                Upload a clear photo of your brows securely from your phone. Janna will personally review your facial structure and email you a custom recommendation on the best pigment and technique for your features.
             </p>
 
-            <div className="max-w-xl mx-auto bg-white border border-[#D4AF37]/20 p-8 rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.03)] text-left">
-                <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-6">
-                    <span className="text-gray-400 text-[9px] uppercase tracking-[0.2em] font-black flex items-center gap-2"><span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Janna is receiving requests</span>
-                    <span className="bg-[#FAF6F0] text-[#D4AF37] px-4 py-1.5 rounded-sm text-[8px] font-black tracking-[0.2em] uppercase border border-[#D4AF37]/20">Secure Portal</span>
+            <div className="max-w-4xl mx-auto bg-white/70 backdrop-blur-3xl border border-white p-6 md:p-10 rounded-3xl shadow-[0_40px_100px_rgba(0,0,0,0.06)] text-left relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/5 via-transparent to-transparent opacity-50 pointer-events-none"></div>
+                
+                <div className="flex justify-between items-center mb-10 border-b border-[#D4AF37]/20 pb-6 relative z-10">
+                    <span className="text-gray-500 text-[9px] uppercase tracking-[0.2em] font-black flex items-center gap-3">
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4AF37] opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#D4AF37]"></span>
+                      </span>
+                      Janna is receiving requests
+                    </span>
+                    <span className="bg-[#FCFBF8] text-[#D4AF37] px-4 py-1.5 rounded-full text-[8px] font-black tracking-[0.2em] uppercase border border-[#D4AF37]/20 shadow-sm">Secure Portal</span>
                 </div>
                 
                 {assessmentStatus === "success" ? (
-                   <div className="text-center py-12 animate-fade-in">
-                      <div className="w-16 h-16 bg-[#FCFBF8] border border-[#D4AF37]/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                         <span className="text-2xl text-[#D4AF37]">✓</span>
+                   <div className="text-center py-20 animate-fade-in relative z-10">
+                      <div className="w-20 h-20 bg-white shadow-[0_20px_40px_rgba(212,175,55,0.2)] rounded-full flex items-center justify-center mx-auto mb-6">
+                         <span className="text-3xl text-[#D4AF37]">✓</span>
                       </div>
-                      <h3 className="font-serif text-xl mb-2 text-[#1A1A1A]">Photos Received successfully!</h3>
-                      <p className="text-gray-500 text-sm">Janna is reviewing your facial structure and will email you shortly.</p>
+                      <h3 className="font-serif text-3xl mb-3 text-[#1A1A1A]">Securely Delivered.</h3>
+                      <p className="text-gray-500 text-sm max-w-sm mx-auto">Your details and photo have been encrypted and sent directly to Janna. She will reach out shortly.</p>
                    </div>
                 ) : (
-                  <form onSubmit={handleAssessmentSubmit} encType="multipart/form-data" className="space-y-6">
+                  <form onSubmit={handleVirtualSubmit} encType="multipart/form-data" className="relative z-10 flex flex-col md:flex-row gap-10 lg:gap-16">
                       
-                      {/* Contact Fields */}
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <input required name="first_name" type="text" placeholder="First Name" className="w-full bg-[#FCFBF8] border border-gray-200 rounded-sm px-4 py-3 text-[#1A1A1A] text-xs focus:outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-400" />
-                          <input required name="last_name" type="text" placeholder="Last Name" className="w-full bg-[#FCFBF8] border border-gray-200 rounded-sm px-4 py-3 text-[#1A1A1A] text-xs focus:outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-400" />
-                        </div>
-                        <input required name="email" type="email" placeholder="Email Address" className="w-full bg-[#FCFBF8] border border-gray-200 rounded-sm px-4 py-3 text-[#1A1A1A] text-xs focus:outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-400" />
-                        <input required name="phone" type="tel" placeholder="Phone Number" className="w-full bg-[#FCFBF8] border border-gray-200 rounded-sm px-4 py-3 text-[#1A1A1A] text-xs focus:outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-400" />
+                      {/* Left: Cinematic Single Image Upload */}
+                      <div className="w-full md:w-5/12 shrink-0">
+                        <label className="relative flex flex-col items-center justify-center w-full aspect-[4/5] bg-[#FCFBF8] border-[1.5px] border-dashed border-[#D4AF37]/40 rounded-2xl cursor-pointer hover:border-[#D4AF37] transition-all duration-500 overflow-hidden group/upload shadow-inner">
+                            <input required type="file" name="client_photo" className="hidden" accept="image/*" onChange={handleImageChange} />
+                            
+                            {previewUrl ? (
+                              <>
+                                <img src={previewUrl} alt="Upload Preview" className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover/upload:scale-105" />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/upload:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
+                                  <span className="text-white text-[9px] uppercase tracking-[0.3em] font-black border border-white/50 px-5 py-2.5 rounded-full backdrop-blur-md">Replace Photo</span>
+                                </div>
+                              </>
+                            ) : (
+                              <div className="flex flex-col items-center justify-center p-6 text-center transform transition-transform duration-500 group-hover/upload:-translate-y-2">
+                                <div className="w-16 h-16 rounded-full bg-white shadow-[0_10px_30px_rgba(212,175,55,0.15)] flex items-center justify-center mb-5 text-[#D4AF37] group-hover/upload:scale-110 transition-transform duration-500">
+                                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4v16m8-8H4"></path></svg>
+                                </div>
+                                <span className="text-[#1A1A1A] font-serif text-xl mb-2">Upload Photo</span>
+                                <span className="text-[8px] text-gray-400 uppercase tracking-[0.2em] font-black leading-relaxed">Clear Lighting<br/>Straight On Angle</span>
+                              </div>
+                            )}
+                        </label>
                       </div>
 
-                      {/* File Uploads wrapped in labels */}
-                      <div>
-                        <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-3">Upload 3 Clear Photos</p>
-                        <div className="grid grid-cols-3 gap-3">
-                            <label className="aspect-square bg-[#FCFBF8] border border-dashed border-[#D4AF37]/40 hover:border-[#D4AF37] rounded-sm flex flex-col items-center justify-center cursor-pointer transition-colors group relative overflow-hidden">
-                                <input required type="file" name="left_brow" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
-                                <span className="text-2xl text-[#D4AF37] mb-2 group-hover:scale-110 transition-transform">+</span>
-                                <span className="text-[8px] text-gray-500 uppercase tracking-[0.2em] font-black">Left Brow</span>
-                            </label>
-                            <label className="aspect-square bg-[#FCFBF8] border border-dashed border-[#D4AF37]/40 hover:border-[#D4AF37] rounded-sm flex flex-col items-center justify-center cursor-pointer transition-colors group relative overflow-hidden">
-                                <input required type="file" name="right_brow" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
-                                <span className="text-2xl text-[#D4AF37] mb-2 group-hover:scale-110 transition-transform">+</span>
-                                <span className="text-[8px] text-gray-500 uppercase tracking-[0.2em] font-black">Right Brow</span>
-                            </label>
-                            <label className="aspect-square bg-[#FCFBF8] border border-dashed border-[#D4AF37]/40 hover:border-[#D4AF37] rounded-sm flex flex-col items-center justify-center cursor-pointer transition-colors group relative overflow-hidden">
-                                <input required type="file" name="full_face" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
-                                <span className="text-2xl text-[#D4AF37] mb-2 group-hover:scale-110 transition-transform">+</span>
-                                <span className="text-[8px] text-gray-500 uppercase tracking-[0.2em] font-black">Full Face</span>
-                            </label>
+                      {/* Right: Floating Label Minimalist Inputs */}
+                      <div className="w-full md:w-7/12 flex flex-col justify-between py-2">
+                        <div className="space-y-8">
+                          
+                          <div className="grid grid-cols-2 gap-6">
+                            <div className="relative group/input">
+                              <input required name="first_name" type="text" id="fname" className="peer w-full bg-transparent border-b border-gray-300 py-3 text-[#1A1A1A] text-sm focus:outline-none focus:border-[#D4AF37] transition-colors placeholder-transparent" placeholder="First Name" />
+                              <label htmlFor="fname" className="absolute left-0 top-3 text-gray-400 text-[9px] uppercase tracking-[0.2em] font-black transition-all peer-placeholder-shown:text-xs peer-placeholder-shown:top-3 peer-focus:-top-4 peer-focus:text-[9px] peer-focus:text-[#D4AF37] peer-valid:-top-4 peer-valid:text-[9px] cursor-text">First Name</label>
+                            </div>
+                            <div className="relative group/input">
+                              <input required name="last_name" type="text" id="lname" className="peer w-full bg-transparent border-b border-gray-300 py-3 text-[#1A1A1A] text-sm focus:outline-none focus:border-[#D4AF37] transition-colors placeholder-transparent" placeholder="Last Name" />
+                              <label htmlFor="lname" className="absolute left-0 top-3 text-gray-400 text-[9px] uppercase tracking-[0.2em] font-black transition-all peer-placeholder-shown:text-xs peer-placeholder-shown:top-3 peer-focus:-top-4 peer-focus:text-[9px] peer-focus:text-[#D4AF37] peer-valid:-top-4 peer-valid:text-[9px] cursor-text">Last Name</label>
+                            </div>
+                          </div>
+                          
+                          <div className="relative group/input">
+                            <input required name="email" type="email" id="email" className="peer w-full bg-transparent border-b border-gray-300 py-3 text-[#1A1A1A] text-sm focus:outline-none focus:border-[#D4AF37] transition-colors placeholder-transparent" placeholder="Email Address" />
+                            <label htmlFor="email" className="absolute left-0 top-3 text-gray-400 text-[9px] uppercase tracking-[0.2em] font-black transition-all peer-placeholder-shown:text-xs peer-placeholder-shown:top-3 peer-focus:-top-4 peer-focus:text-[9px] peer-focus:text-[#D4AF37] peer-valid:-top-4 peer-valid:text-[9px] cursor-text">Email Address</label>
+                          </div>
+                          
+                          <div className="relative group/input">
+                            <input required name="phone" type="tel" id="phone" className="peer w-full bg-transparent border-b border-gray-300 py-3 text-[#1A1A1A] text-sm focus:outline-none focus:border-[#D4AF37] transition-colors placeholder-transparent" placeholder="Phone Number" />
+                            <label htmlFor="phone" className="absolute left-0 top-3 text-gray-400 text-[9px] uppercase tracking-[0.2em] font-black transition-all peer-placeholder-shown:text-xs peer-placeholder-shown:top-3 peer-focus:-top-4 peer-focus:text-[9px] peer-focus:text-[#D4AF37] peer-valid:-top-4 peer-valid:text-[9px] cursor-text">Phone Number</label>
+                          </div>
                         </div>
-                      </div>
 
-                      <button 
-                        type="submit"
-                        disabled={assessmentStatus === "loading"}
-                        className="w-full bg-[#1A1A1A] hover:bg-[#D4AF37] text-white py-4.5 rounded-sm text-[10px] md:text-xs font-black uppercase tracking-[0.2em] shadow-lg transition-colors disabled:opacity-50"
-                      >
-                          {assessmentStatus === "loading" ? "Uploading & Sending..." : "Submit Photos to Janna"}
-                      </button>
-                      {assessmentStatus === "error" && <p className="text-red-500 text-[10px] text-center mt-2 font-bold">Something went wrong. Please try again.</p>}
+                        <button 
+                          type="submit"
+                          disabled={assessmentStatus === "loading"}
+                          className="w-full bg-[#1A1A1A] hover:bg-[#D4AF37] text-white py-5 rounded-sm text-[10px] md:text-xs font-black uppercase tracking-[0.3em] shadow-[0_20px_40px_rgba(0,0,0,0.15)] hover:shadow-[0_20px_40px_rgba(212,175,55,0.3)] transition-all duration-500 disabled:opacity-50 mt-10 flex justify-center items-center gap-3"
+                        >
+                            {assessmentStatus === "loading" ? "Encrypting & Sending..." : "Submit to Janna"}
+                            {assessmentStatus !== "loading" && <span className="text-[14px]">→</span>}
+                        </button>
+                        {assessmentStatus === "error" && <p className="text-red-500 text-[10px] uppercase tracking-widest text-center mt-3 font-bold">Connection error. Please try again.</p>}
+                      </div>
                   </form>
                 )}
             </div>
         </div>
       </section>
+
+
 
 
       {/* 10. THE FOOTER (WITH POLICY LINKS) */}
