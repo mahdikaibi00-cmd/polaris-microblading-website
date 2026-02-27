@@ -29,29 +29,69 @@ export default function Home() {
     handleSliderMove(e.touches[0].clientX);
   };
 
-  // --- 3M DOLLAR MARQUEE LOGIC (AUTO-SCROLL + DRAG/SWIPE) ---
+  const reviewsData = [
+    { initial: "A", name: "Anna", link: "https://maps.app.goo.gl/SYMzModDM8EXBM6F7", text: "Amazing experience! Janna was so professional, thorough, knowledgeable, personable and TALENTED! Absolutely love my brows!!" },
+    { initial: "S", name: "Susana Cuero", link: "https://www.google.com/maps/place/Polaris+Aesthetics/@40.1442707,-82.9914008,17z/data=!3m1!4b1!4m6!3m5!1s0x8838f52e99680d51:0x15b295572df54161!8m2!3d40.1442707!4d-82.9888259!16s%2Fg%2F11jnf_hb4q?entry=ttu&g_ep=EgoyMDI2MDIyMy4wIKXMDSoASAFQAw%3D%3D", text: "The service is excellent!!! You get what you expect!!! 😍😍😍 plus you feel like if you were in a SPA 🧘‍♀️." },
+    { initial: "W", name: "Wendy", link: "https://maps.app.goo.gl/SYMzModDM8EXBM6F7", text: "Janna was very professional and made me feel very comfortable... She was very thorough in explaining the process and aftercare." }
+  ];
+
+  // --- INLINE VIRTUAL ASSESSMENT LOGIC (FORMSPREE - BULLETPROOF) ---
+  const [assessmentStatus, setAssessmentStatus] = useState("idle");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatStep, setChatStep] = useState(1);
+  const [isVideoOpen, setIsVideoOpen] = useState(false); 
+  
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert("File is too large. Please select an image under 5MB.");
+        e.target.value = ""; 
+        return;
+      }
+      setPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setPreviewUrl(null);
+    }
+  };
+
+  const handleAssessmentSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setAssessmentStatus("loading");
+    setChatStep(3); // Start the animation
+    
+    const formData = new FormData(e.currentTarget);
+
+    try {
+      // Formspree endpoint perfectly routes everything and allows files without Pro
+      const response = await fetch("YOUR_FORMSPREE_LINK_HERE", {
+        method: "POST",
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        setAssessmentStatus("success");
+        setChatStep(4);
+      } else {
+        setAssessmentStatus("error");
+        setChatStep(4);
+      }
+    } catch (error) {
+      setAssessmentStatus("error");
+      setChatStep(4);
+    }
+  };
+
+  // --- 3M DOLLAR MARQUEE LOGIC ---
   const marqueeRef = useRef<HTMLDivElement>(null);
   const [isMarqueePaused, setIsMarqueePaused] = useState(false);
   const [isDraggingMarquee, setIsDraggingMarquee] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-
-  useEffect(() => {
-    const el = marqueeRef.current;
-    if (!el || isMarqueePaused || isDraggingMarquee) return;
-    
-    let animationId: number;
-    const scrollStep = () => {
-      el.scrollLeft += 1; // Speed of the auto-scroll
-      if (el.scrollLeft >= el.scrollWidth / 2) {
-        el.scrollLeft = 0;
-      }
-      animationId = requestAnimationFrame(scrollStep);
-    };
-    
-    animationId = requestAnimationFrame(scrollStep);
-    return () => cancelAnimationFrame(animationId);
-  }, [isMarqueePaused, isDraggingMarquee]);
 
   const onMarqueeMouseDown = (e: ReactMouseEvent) => {
     setIsDraggingMarquee(true);
@@ -76,63 +116,8 @@ export default function Home() {
     if (!isDraggingMarquee || !marqueeRef.current) return;
     e.preventDefault();
     const x = e.pageX - marqueeRef.current.offsetLeft;
-    const walk = (x - startX) * 2; // Scroll speed multiplier
+    const walk = (x - startX) * 2; 
     marqueeRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  // --- REVIEWS DATA ---
-  const reviewsData = [
-    { initial: "A", name: "Anna", link: "https://maps.app.goo.gl/SYMzModDM8EXBM6F7", text: "Amazing experience! Janna was so professional, thorough, knowledgeable, personable and TALENTED! Absolutely love my brows!!" },
-    { initial: "S", name: "Susana Cuero", link: "https://www.google.com/maps/place/Polaris+Aesthetics/@40.1442707,-82.9914008,17z/data=!3m1!4b1!4m6!3m5!1s0x8838f52e99680d51:0x15b295572df54161!8m2!3d40.1442707!4d-82.9888259!16s%2Fg%2F11jnf_hb4q?entry=ttu&g_ep=EgoyMDI2MDIyMy4wIKXMDSoASAFQAw%3D%3D", text: "The service is excellent!!! You get what you expect!!! 😍😍😍 plus you feel like if you were in a SPA 🧘‍♀️." },
-    { initial: "W", name: "Wendy", link: "https://maps.app.goo.gl/SYMzModDM8EXBM6F7", text: "Janna was very professional and made me feel very comfortable... She was very thorough in explaining the process and aftercare." }
-  ];
-
-  // --- VIRTUAL ASSESSMENT LOGIC ---
-  const [assessmentStatus, setAssessmentStatus] = useState("idle");
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chatStep, setChatStep] = useState(1);
-  const [isVideoOpen, setIsVideoOpen] = useState(false); 
-  
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert("File is too large. Please select an image under 5MB.");
-        e.target.value = ""; 
-        return;
-      }
-      setPreviewUrl(URL.createObjectURL(file));
-    } else {
-      setPreviewUrl(null);
-    }
-  };
-
-  const handleAssessmentSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setAssessmentStatus("loading");
-    setChatStep(3); // Loading State
-    
-    const formData = new FormData(e.currentTarget);
-    formData.append("access_key", "de75332f-f09b-4b62-afc0-e22d429112fb");
-    formData.append("subject", "🚨 New Virtual Assessment & Photo - Polaris");
-
-    try {
-      const response = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        body: formData // FormData automatically handles the multipart/form-data for the image
-      });
-      if (response.ok) {
-        setAssessmentStatus("success");
-        setChatStep(4);
-      } else {
-        setAssessmentStatus("error");
-        setChatStep(4);
-      }
-    } catch (error) {
-      setAssessmentStatus("error");
-      setChatStep(4);
-    }
   };
 
   return (
@@ -179,6 +164,7 @@ export default function Home() {
           
           <div className="hidden lg:flex space-x-10 text-[#1A1A1A] text-[11px] font-bold uppercase tracking-[0.15em] relative">
             
+            {/* UPGRADED APPLE LIQUID GLASS DROPDOWN */}
             <div className="relative group py-8">
               <a href="https://polarismicroblading.glossgenius.com/services" target="_blank" rel="noreferrer" className="hover:text-[#D4AF37] transition-colors flex items-center gap-1 cursor-pointer">
                 Treatments <span className="text-[8px] group-hover:rotate-180 transition-transform duration-300">▼</span>
@@ -260,7 +246,15 @@ export default function Home() {
             <div className="absolute -inset-4 md:-inset-6 bg-white/40 backdrop-blur-2xl rounded-t-[10rem] rounded-b-lg border border-white/60 shadow-[0_30px_60px_rgba(0,0,0,0.05)] z-0 transform transition-transform duration-1000 group-hover:scale-105"></div>
             
             <div className="absolute inset-0 rounded-t-[9rem] rounded-b-sm overflow-hidden shadow-2xl z-10 bg-[#FAF6F0]">
-              <img src="/hero.jpg" className="w-full h-full object-cover opacity-95 transition-transform duration-1000 group-hover:scale-110" alt="Flawless Microblading" />
+              {/* --- NEXT.JS OPTIMIZED IMAGE --- */}
+              <Image 
+                src="/hero.jpg" 
+                fill 
+                sizes="(max-width: 768px) 100vw, 50vw" 
+                priority
+                className="object-cover opacity-95 transition-transform duration-1000 group-hover:scale-110" 
+                alt="Flawless Microblading" 
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A]/40 to-transparent"></div>
             </div>
             
@@ -523,10 +517,24 @@ export default function Home() {
             <div className="md:w-1/2 relative w-full flex justify-center">
                 <div className="absolute top-[10%] left-[-5%] w-[80%] h-[90%] bg-[#FAF6F0] rounded-t-[15rem] rounded-b-xl -z-10 border border-[#D4AF37]/20"></div>
                 <div className="w-[85%] aspect-[2/3] rounded-t-[15rem] rounded-b-sm overflow-hidden shadow-2xl relative z-10 border-[6px] border-white bg-gray-100">
-                    <img src="/janna.jpg" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000" alt="Janna Sulemann" />
+                    {/* --- NEXT.JS OPTIMIZED IMAGE --- */}
+                    <Image 
+                      src="/janna.jpg" 
+                      fill 
+                      sizes="(max-width: 768px) 100vw, 50vw" 
+                      className="object-cover grayscale hover:grayscale-0 transition-all duration-1000" 
+                      alt="Janna Sulemann" 
+                    />
                 </div>
                 <div className="absolute bottom-10 -right-4 bg-white/90 backdrop-blur-sm p-4 rounded-lg shadow-xl border border-[#D4AF37]/10 z-20">
-                    <img src="/janna-sign.jpg" className="h-10 opacity-80 mix-blend-multiply" alt="Janna Signature" />
+                    {/* --- NEXT.JS OPTIMIZED IMAGE --- */}
+                    <Image 
+                      src="/janna-sign.png" 
+                      width={200} 
+                      height={40} 
+                      className="h-10 w-auto opacity-80 mix-blend-multiply" 
+                      alt="Janna Signature" 
+                    />
                     <p className="text-[7px] uppercase tracking-[0.3em] font-black text-center mt-2 text-[#D4AF37]">Master Artist</p>
                 </div>
             </div>
@@ -566,11 +574,7 @@ export default function Home() {
         </div>
       </section>
 
-
-
-
-
-{/* 7. RE-ENGINEERED 3M DOLLAR MARQUEE (ULTRA-LUXURY, SCROLLABLE, CLICKABLE) */}
+      {/* 7. RE-ENGINEERED 3M DOLLAR MARQUEE (ULTRA-LUXURY, SCROLLABLE, CLICKABLE) */}
       <section className="py-24 lg:py-40 bg-[#FCFBF8] clip-diagonal-bottom relative z-20 overflow-hidden border-t border-[#D4AF37]/10">
          {/* Ambient glow */}
          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-gradient-to-r from-[#D4AF37]/5 via-transparent to-[#D4AF37]/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
@@ -585,7 +589,7 @@ export default function Home() {
          <div 
            ref={marqueeRef}
            onMouseEnter={() => setIsMarqueePaused(true)}
-           onMouseLeave={() => { setIsDraggingMarquee(false); setIsMarqueePaused(false); }}
+           onMouseLeave={onMarqueeMouseLeave}
            onMouseDown={onMarqueeMouseDown}
            onMouseUp={onMarqueeMouseUp}
            onMouseMove={onMarqueeMouseMove}
@@ -597,7 +601,7 @@ export default function Home() {
              WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)' 
            }}
          >
-            {/* We multiply the array to ensure long scrolling without running out of cards */}
+            {/* Array multiplied so it loops perfectly */}
             {[...reviewsData, ...reviewsData, ...reviewsData, ...reviewsData].map((review, i) => (
               <div 
                 key={i} 
@@ -623,10 +627,18 @@ export default function Home() {
                             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                           </svg>
                       </div>
-                      <p className="text-gray-600 text-base md:text-lg leading-relaxed font-medium mb-10 flex-grow">"{review.text}"</p>
+                      <p className="text-gray-600 text-base md:text-lg leading-relaxed font-medium mb-10 flex-grow pointer-events-none">"{review.text}"</p>
                       
                       <div className="flex items-center justify-between border-t border-gray-100 pt-6 mt-auto">
-                          <a href={review.link} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-3 bg-[#FCFBF8] border border-[#D4AF37]/20 hover:border-[#D4AF37] hover:bg-[#D4AF37] hover:text-white text-[#1A1A1A] px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 z-20 cursor-pointer">
+                          {/* stopPropagation ensures clicking this doesn't accidentally trigger the drag logic */}
+                          <a 
+                            href={review.link} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            onMouseDown={(e) => e.stopPropagation()} 
+                            onTouchStart={(e) => e.stopPropagation()}
+                            className="inline-flex items-center justify-center gap-3 bg-[#FCFBF8] border border-[#D4AF37]/20 hover:border-[#D4AF37] hover:bg-[#D4AF37] hover:text-white text-[#1A1A1A] px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 z-20 cursor-pointer"
+                          >
                             Read Original <span className="text-[14px] group-hover:translate-x-1 transition-transform">→</span>
                           </a>
                           <span className="text-[#D4AF37] text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5">
@@ -638,7 +650,6 @@ export default function Home() {
             ))}
          </div>
       </section>
-
 
       {/* 8. INTERACTIVE BEFORE & AFTER SLIDER (LOCAL IMAGES) */}
       <section className="py-24 lg:py-32 bg-[#FCFBF8] relative z-10">
@@ -661,8 +672,25 @@ export default function Home() {
               onTouchStart={(e) => { setIsDraggingSlider(true); handleSliderMove(e.touches[0].clientX); }}
               onTouchEnd={() => setIsDraggingSlider(false)}
             >
-              <img src="/before.jpg" className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none grayscale opacity-70" alt="Before Brows" draggable="false" />
-              <img src="/after.jpg" className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none" style={{ clipPath: `polygon(0 0, ${sliderPosition}% 0, ${sliderPosition}% 100%, 0 100%)` }} alt="After Brows" draggable="false" />
+              {/* --- NEXT.JS OPTIMIZED IMAGE --- */}
+              <Image 
+                src="/before.jpg" 
+                fill 
+                sizes="(max-width: 768px) 100vw, 50vw" 
+                className="object-cover object-center pointer-events-none grayscale opacity-70" 
+                alt="Before Brows" 
+                draggable="false" 
+              />
+              {/* --- NEXT.JS OPTIMIZED IMAGE --- */}
+              <Image 
+                src="/after.jpg" 
+                fill 
+                sizes="(max-width: 768px) 100vw, 50vw" 
+                className="object-cover object-center pointer-events-none" 
+                style={{ clipPath: `polygon(0 0, ${sliderPosition}% 0, ${sliderPosition}% 100%, 0 100%)` }} 
+                alt="After Brows" 
+                draggable="false" 
+              />
               
               <div className="absolute inset-y-0 w-[2px] bg-white shadow-[0_0_15px_#D4AF37] z-20 pointer-events-none transition-transform duration-75" style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}>
                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-14 h-14 bg-white/90 backdrop-blur-md rounded-full shadow-[0_0_30px_rgba(212,175,55,0.5)] flex items-center justify-center border border-[#D4AF37] group-hover:scale-110 transition-transform duration-300">
@@ -724,6 +752,7 @@ export default function Home() {
                       {/* Left: Cinematic Single Image Upload */}
                       <div className="w-full md:w-5/12 shrink-0">
                         <label className="relative flex flex-col items-center justify-center w-full aspect-[4/5] bg-[#FCFBF8] border-[1.5px] border-dashed border-[#D4AF37]/40 rounded-2xl cursor-pointer hover:border-[#D4AF37] transition-all duration-500 overflow-hidden group/upload shadow-inner">
+                            {/* The absolute inset-0 input hack allows validation to pass perfectly without 'hidden' crashing the browser */}
                             <input required type="file" name="attachment" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" accept="image/png, image/jpeg, image/jpg, image/webp" onChange={handleImageChange} />
                             
                             {previewUrl ? (
@@ -846,14 +875,6 @@ export default function Home() {
       
       {/* GLOBAL STYLES FOR ANIMATIONS AND CLIP-PATHS */}
       <style dangerouslySetInnerHTML={{__html: `
-        @keyframes marquee {
-          0% { transform: translateX(0%); }
-          100% { transform: translateX(-100%); }
-        }
-        .animate-marquee {
-          animation: marquee 35s linear infinite;
-        }
-
         @keyframes slide-up {
           0% { transform: translateY(20px); opacity: 0; }
           100% { transform: translateY(0); opacity: 1; }
